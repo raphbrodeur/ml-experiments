@@ -4,3 +4,4 @@ from src.data.generation.base import (
     GeneratedData,
     NormalUncertainty
 )
+from src.data.generation.simple_linear_regression import SimpleLinearRegression
