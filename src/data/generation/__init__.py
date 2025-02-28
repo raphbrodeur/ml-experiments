@@ -5,3 +5,4 @@ from src.data.generation.base import (
     NormalUncertainty
 )
 from src.data.generation.simple_linear_regression import SimpleLinearRegression
+from src.data.generation.simple_wiggly_regression import SimpleWigglyRegression
