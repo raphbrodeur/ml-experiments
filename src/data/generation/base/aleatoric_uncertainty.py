@@ -75,7 +75,7 @@ class NormalUncertainty(UncertaintyDistribution):
         noise : ndarray
             The sampled noise for each input signal. Has shape (num_signals, ...).
         """
-        noise = normal(self.mean, self.std, len(x))     # len(x) is the number of observations
+        noise = normal(self.mean, self.std, signal.shape)
 
         return noise
 
