@@ -16,9 +16,9 @@ from numpy import atleast_1d, ndarray, zeros
 from src.data.generation.base.aleatoric_uncertainty import AleatoricUncertainty, UncertaintyDistribution
 
 
-class GeneratedData(NamedTuple):
+class SyntheticData(NamedTuple):
     """
-    Stores a generated data observation.
+    Stores a single observation of synthetic data.
 
     Elements
     --------
@@ -84,7 +84,8 @@ class DataGenerationProcess(ABC):
         Returns
         -------
         uncertainty : Tuple[ndarray, ndarray]
-            A tuple containing the observations' features x uncertainty terms and the observations' targets (y) uncertainty terms.
+            A tuple containing the observations' features x uncertainty terms and the observations' targets (y)
+            uncertainty terms.
         """
         # Features uncertainty (for errors-in-variables cases, measurement errors)
         if self.aleatoric_uncertainty.feature_uncertainty is None:
@@ -108,7 +109,7 @@ class DataGenerationProcess(ABC):
 
         return x_unc, y_unc
 
-    def sample_dataset(self, x: ndarray) -> List[GeneratedData]:
+    def sample_dataset(self, x: ndarray) -> List[SyntheticData]:
         """
         Samples a dataset from the DGP. Takes as input the observations' features x of the dataset to be sampled rather
         than simply the amount of observations to sample so that domain is inherently defined. Also, in practice, a
@@ -126,21 +127,21 @@ class DataGenerationProcess(ABC):
 
         Returns
         -------
-        generated_data : List[GeneratedData]
-            A list of GeneratedData named tuples. Each item of the list is a different observation.
+        synthetic_data : List[SyntheticData]
+            A list of SyntheticData named tuples. Each item of the list is a different observation.
         """
         y = self._deterministic_function(x)
 
         # Error terms are added to x after deterministic y(x) has been calculated. See error-in-variables models.
         x_unc, y_unc = self._aleatoric_uncertainty_terms(x)
 
-        generated_data = []
+        synthetic_data = []
         for i in range(len(x)):     # len(x) is the number of observations.
-            generated_data.append(
-                GeneratedData(
+            synthetic_data.append(
+                SyntheticData(
                     x=atleast_1d(x[i] + x_unc[i]),
                     y=atleast_1d(y[i] + y_unc[i])
                 )
             )
 
-        return generated_data
+        return synthetic_data
