@@ -5,8 +5,10 @@
     @Creation Date:     02/2025
     @Last modification: 02/2025
 
-    @Description:       This file contains different aleatoric uncertainties types and a function to treat them. This is
-                        used for data generation.
+    @Description:       This file contains different aleatoric uncertainties types and their base class
+                        UncertaintyDistribution. This file also contains the AleatoricUncertainty NamedTuple for storing
+                        the aleatoric uncertainty to apply on features (see error-in-variables) and on targets. These
+                        classes are used for data generation.
 """
 
 from abc import ABC, abstractmethod
