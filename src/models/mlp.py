@@ -45,6 +45,8 @@ class MLP(Model):
         """
         Builds the model and initializes weights.
         """
+        super().build()
+
         self.mlp = MLPBlock(
             hidden_channels_width=self.hidden_channels_width,
             activation=self.activation,

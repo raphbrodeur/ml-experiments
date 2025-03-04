@@ -12,6 +12,7 @@ from typing import List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 from src.data.generation import DataGenerationProcess, NormalUncertainty, SyntheticData
 
@@ -65,5 +66,30 @@ def plot_dgp(
 
     # Set x-axis limits
     ax.set_xlim(np.min(domain), np.max(domain))
+
+    plt.show()
+
+
+def plot_trained_model(
+        model,
+        training_data,
+        domain: np.ndarray = np.linspace(-3, 3, 1000)
+):
+    """
+    Description.
+    """
+    fig, ax = plt.subplots()  # Create plot
+    domain_torch = torch.tensor([[domain[i]] for i in range(len(domain))], dtype=torch.float32)
+
+    model.eval()
+    with torch.no_grad():
+        y_pred = model(domain_torch)
+        y_pred = y_pred.cpu().numpy()
+
+    ax.plot(domain, y_pred, label='trained model', color='red', zorder=3)  # Plot trained model
+
+    if training_data is not None:
+        for data in training_data:
+            ax.scatter(data.x, data.y, color="black", zorder=1)
 
     plt.show()
