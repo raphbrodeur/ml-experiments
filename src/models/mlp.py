@@ -12,11 +12,11 @@ from typing import Optional, Sequence
 
 from torch import Tensor
 from torch.nn import Module
+from torch.optim import AdamW
 from torch.utils.data import DataLoader
-import torch
 
-from src.models.base import check_if_built, MLPBlock, Model
 from src.data.datasets import SyntheticDataset
+from src.models.base import check_if_built, MLPBlock, Model
 
 
 class MLP(Model):
@@ -68,21 +68,21 @@ class MLP(Model):
         """
         return self.mlp(x)
 
-    def _train_mse_gd(
+    def train_mse(
             self,
             ds: SyntheticDataset,
             lr: float,
             num_epoch: int
     ):
         """
-        Temporary function to train the model using MSE and gradient descent.
+        Temporary method; an actual trainer will be implemented.
         """
         loader = DataLoader(
             dataset=ds,
-            batch_size=len(ds)
+            batch_size=64
         )
 
-        opt = torch.optim.AdamW(
+        opt = AdamW(
             params=self.parameters(),
             lr=lr
         )
@@ -103,7 +103,7 @@ class MLP(Model):
                 # Calculate cost
                 mse = (y - y_pred) ** 2
                 cost = mse.mean()
-                print(f"At epoch {epoch}, MSE = {cost}")
+                print(f"At epoch {epoch}, batch cost MSE = {cost}")
 
                 # Backward pass
                 cost.backward()
