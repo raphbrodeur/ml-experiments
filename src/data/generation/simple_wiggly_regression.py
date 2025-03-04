@@ -71,7 +71,7 @@ class SimpleWigglyRegression(DataGenerationProcess):
         self.j: int = j
         self.k: int = k
 
-    def _deterministic_function(self, x: ndarray) -> ndarray:
+    def deterministic_function(self, x: ndarray) -> ndarray:
         """
         Gets the deterministic component of target value y for a given observation's features x according to the DGP's
         underlying deterministic function.

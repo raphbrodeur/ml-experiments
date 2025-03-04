@@ -55,7 +55,7 @@ class DataGenerationProcess(ABC):
         self.aleatoric_uncertainty = aleatoric_uncertainty
 
     @abstractmethod
-    def _deterministic_function(self, x: ndarray) -> ndarray:
+    def deterministic_function(self, x: ndarray) -> ndarray:
         """
         Gets the deterministic component of target value y for a given observation's features x according to the DGP's
         underlying deterministic function.
@@ -72,7 +72,7 @@ class DataGenerationProcess(ABC):
         """
         raise NotImplementedError
 
-    def _aleatoric_uncertainty_terms(self, x: ndarray) -> Tuple[ndarray, ndarray]:
+    def aleatoric_uncertainty_terms(self, x: ndarray) -> Tuple[ndarray, ndarray]:
         """
         Gets error terms representing aleatoric uncertainty for given observations' features x and targets y.
 
@@ -130,10 +130,10 @@ class DataGenerationProcess(ABC):
         synthetic_data : List[SyntheticData]
             A list of SyntheticData named tuples. Each item of the list is a different observation.
         """
-        y = self._deterministic_function(x)
+        y = self.deterministic_function(x)
 
         # Error terms are added to x after deterministic y(x) has been calculated. See error-in-variables models.
-        x_unc, y_unc = self._aleatoric_uncertainty_terms(x)
+        x_unc, y_unc = self.aleatoric_uncertainty_terms(x)
 
         synthetic_data = []
         for i in range(len(x)):     # len(x) is the number of observations.
