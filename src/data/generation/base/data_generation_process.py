@@ -5,7 +5,8 @@
     @Creation Date:     02/2025
     @Last modification: 02/2025
 
-    @Description:       This file contains the base class for all data generation processes.
+    @Description:       This file contains the abstract class DataGenerationProcess that serves as a base class for all
+                        data generation processes.
 """
 
 from abc import ABC, abstractmethod
@@ -33,9 +34,8 @@ class SyntheticData(NamedTuple):
 
 class DataGenerationProcess(ABC):
     """
-    This class defines the abstract class DataGenerationProcess. This class serves as a base class for all data
-    generation processes (DGPs). The DGP is decomposed into a deterministic function and stochastic terms
-    representing aleatoric uncertainty.
+    This class serves as a base class for all data generation processes (DGPs). The DGP is decomposed into a
+    deterministic function and stochastic terms representing aleatoric uncertainty.
     """
 
     def __init__(self, aleatoric_uncertainty: Optional[AleatoricUncertainty] = None):
