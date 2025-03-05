@@ -5,7 +5,8 @@
     @Creation Date:     02/2025
     @Last modification: 02/2025
 
-    @Description:       This file contains the base class for all data generation processes.
+    @Description:       This file contains the abstract class DataGenerationProcess that serves as a base class for all
+                        data generation processes.
 """
 
 from abc import ABC, abstractmethod
@@ -33,9 +34,8 @@ class SyntheticData(NamedTuple):
 
 class DataGenerationProcess(ABC):
     """
-    This class defines the abstract class DataGenerationProcess. This class serves as a base class for all data
-    generation processes (DGPs). The DGP is decomposed into a deterministic function and stochastic terms
-    representing aleatoric uncertainty.
+    This class serves as a base class for all data generation processes (DGPs). The DGP is decomposed into a
+    deterministic function and stochastic terms representing aleatoric uncertainty.
     """
 
     def __init__(self, aleatoric_uncertainty: Optional[AleatoricUncertainty] = None):
@@ -55,7 +55,7 @@ class DataGenerationProcess(ABC):
         self.aleatoric_uncertainty = aleatoric_uncertainty
 
     @abstractmethod
-    def _deterministic_function(self, x: ndarray) -> ndarray:
+    def deterministic_function(self, x: ndarray) -> ndarray:
         """
         Gets the deterministic component of target value y for a given observation's features x according to the DGP's
         underlying deterministic function.
@@ -72,7 +72,7 @@ class DataGenerationProcess(ABC):
         """
         raise NotImplementedError
 
-    def _aleatoric_uncertainty_terms(self, x: ndarray) -> Tuple[ndarray, ndarray]:
+    def aleatoric_uncertainty_terms(self, x: ndarray) -> Tuple[ndarray, ndarray]:
         """
         Gets error terms representing aleatoric uncertainty for given observations' features x and targets y.
 
@@ -90,26 +90,22 @@ class DataGenerationProcess(ABC):
         # Features uncertainty (for errors-in-variables cases, measurement errors)
         if self.aleatoric_uncertainty.feature_uncertainty is None:
             x_unc = zeros(len(x))   # len(x) is the number of observations
-
         elif isinstance(self.aleatoric_uncertainty.feature_uncertainty, UncertaintyDistribution):
             x_unc = self.aleatoric_uncertainty.feature_uncertainty.sample(x)
-
         else:
             raise Exception("Not a valid measure uncertainty distribution.")
 
         # Target uncertainty
         if self.aleatoric_uncertainty.target_uncertainty is None:
             y_unc = zeros(len(x))   # len(x) is the number of observations
-
         elif isinstance(self.aleatoric_uncertainty.target_uncertainty, UncertaintyDistribution):
             y_unc = self.aleatoric_uncertainty.target_uncertainty.sample(x)
-
         else:
             raise Exception("Not a valid aleatoric target uncertainty type")
 
         return x_unc, y_unc
 
-    def sample_dataset(self, x: ndarray) -> List[SyntheticData]:
+    def sample_data(self, x: ndarray) -> List[SyntheticData]:
         """
         Samples a dataset from the DGP. Takes as input the observations' features x of the dataset to be sampled rather
         than simply the amount of observations to sample so that domain is inherently defined. Also, in practice, a
@@ -130,10 +126,10 @@ class DataGenerationProcess(ABC):
         synthetic_data : List[SyntheticData]
             A list of SyntheticData named tuples. Each item of the list is a different observation.
         """
-        y = self._deterministic_function(x)
+        y = self.deterministic_function(x)
 
         # Error terms are added to x after deterministic y(x) has been calculated. See error-in-variables models.
-        x_unc, y_unc = self._aleatoric_uncertainty_terms(x)
+        x_unc, y_unc = self.aleatoric_uncertainty_terms(x)
 
         synthetic_data = []
         for i in range(len(x)):     # len(x) is the number of observations.
