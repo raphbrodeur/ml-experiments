@@ -20,7 +20,7 @@ from src.data.generation import DataGenerationProcess, NormalUncertainty, Synthe
 def plot_dgp(
         dgp: DataGenerationProcess,
         sampled_data: Optional[List[SyntheticData]] = None,
-        domain: np.ndarray = np.linspace(-10, 10, 1000)
+        domain: np.ndarray = np.linspace(-3, 3, 1000)
 ):
     """
     Plots the data generation process (DGP) in a general way. Currently, only implemented for R^1 -> R^1 DGP's with
@@ -34,7 +34,7 @@ def plot_dgp(
     sampled_data : Optional[List[SyntheticData]]
         The generated data to plot. If None, only the DGP function is plotted. Defaults to None.
     domain : ndarray
-        The domain over which to plot the DGP. Defaults to np.linspace(-10, 10, 1000).
+        The domain over which to plot the DGP. Defaults to np.linspace(-3, 3, 1000).
     """
     if dgp.aleatoric_uncertainty.feature_uncertainty is not None:
         raise Exception("Visualization not implemented for feature uncertainty (error-in-variables).")
@@ -73,7 +73,7 @@ def plot_dgp(
 def plot_trained_model(
         model,
         training_data,
-        domain: np.ndarray = np.linspace(-3, 3, 1000)
+        domain: np.ndarray = np.linspace(-10, 10, 1000)
 ):
     """
     Description.

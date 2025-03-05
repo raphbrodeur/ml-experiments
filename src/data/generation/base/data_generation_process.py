@@ -90,26 +90,22 @@ class DataGenerationProcess(ABC):
         # Features uncertainty (for errors-in-variables cases, measurement errors)
         if self.aleatoric_uncertainty.feature_uncertainty is None:
             x_unc = zeros(len(x))   # len(x) is the number of observations
-
         elif isinstance(self.aleatoric_uncertainty.feature_uncertainty, UncertaintyDistribution):
             x_unc = self.aleatoric_uncertainty.feature_uncertainty.sample(x)
-
         else:
             raise Exception("Not a valid measure uncertainty distribution.")
 
         # Target uncertainty
         if self.aleatoric_uncertainty.target_uncertainty is None:
             y_unc = zeros(len(x))   # len(x) is the number of observations
-
         elif isinstance(self.aleatoric_uncertainty.target_uncertainty, UncertaintyDistribution):
             y_unc = self.aleatoric_uncertainty.target_uncertainty.sample(x)
-
         else:
             raise Exception("Not a valid aleatoric target uncertainty type")
 
         return x_unc, y_unc
 
-    def sample_dataset(self, x: ndarray) -> List[SyntheticData]:
+    def sample_data(self, x: ndarray) -> List[SyntheticData]:
         """
         Samples a dataset from the DGP. Takes as input the observations' features x of the dataset to be sampled rather
         than simply the amount of observations to sample so that domain is inherently defined. Also, in practice, a

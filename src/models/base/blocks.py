@@ -5,7 +5,7 @@
     @Creation Date:     02/2025
     @Last modification: 02/2025
 
-    @Description:       This file contains multiple blocks and modules used to build torch models.
+    @Description:       This file contains blocks and modules used to build torch models.
 """
 
 from typing import Optional, Sequence
@@ -18,7 +18,7 @@ from src.models.base.utils import get_activation_layer
 class NAD(Sequential):
     """
     This class constructs a sequential module of optional normalization (N), activation (A), and dropout (D) layers with
-    given ordering. Inspired by the ADN module from MONAI.
+    a given ordering. Inspired by the ADN module from MONAI.
     """
 
     def __init__(

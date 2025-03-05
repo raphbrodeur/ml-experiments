@@ -66,3 +66,39 @@ def get_activation_layer(name: str, **kwargs):
 
     else:
         raise ValueError(f"Activation function {name} not supported.")
+
+
+def get_normalization_layer(name: str, **kwargs):
+    """
+    This function gets a normalization module given its name and arguments.
+
+    Parameters
+    ----------
+    name : str
+        The name of the normalization function.
+    **kwargs
+        The parameters of the normalization function.
+
+    Returns
+    -------
+    layer : Module
+        The normalization module.
+    """
+    pass
+
+
+def get_dropout_layer(prob: float):
+    """
+    This function gets a dropout layer.
+
+    Parameters
+    ----------
+    prob : float
+        The dropout probability.
+
+    Returns
+    -------
+    layer : Module
+        The dropout module.
+    """
+    pass
