@@ -3,43 +3,72 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
-    @Description:       This file contains utility functions for creating models.
+    @Description:       This file contains utility functions for creating and using models.
 """
 
-from torch.nn import LeakyReLU, Module, PReLU, ReLU, Sigmoid, Tanh
+from typing import Callable
+
+from torch.nn import Module
+
+from src.models.base.layer_factory import Act, Dropout, Norm
 
 
-def check_if_built(_func):
+def check_if_built(func: Callable) -> Callable:
     """
     This decorator is used to ensure that the model has been built before calling the decorated method.
 
     Parameters
     ----------
-    _func : function
+    func : Callable
         The function to decorate.
 
     Returns
     -------
-    wrapper : function
+    _wrapper : Callable
         The decorated function.
+
+    Raises
+    ------
+    Exception
+        If model has not been built with .build() method.
     """
-    def wrapper(*args, **kwargs):
+    def _wrapper(*args, **kwargs):
         self = args[0]
 
-        assert self._is_built, (
-            f"The model has to be built using the 'build' method prior to calling the method {_func.__name__}."
-        )
+        if not self._is_built:
+            raise Exception(
+                f"The model has to be built using the 'build' method prior to calling the method {func.__name__}."
+            )
 
-        return _func(*args, **kwargs)
+        return func(*args, **kwargs)
 
-    return wrapper
+    return _wrapper
 
 
-def get_activation_layer(name: str, **kwargs):
+def enable_dropout(module: Module):
     """
-    This function gets an activation module given its name and arguments.
+    This function enables dropout for a Torch Module.
+
+    Parameters
+    ----------
+    module : Module
+        The module for which to enable dropout.
+
+    Returns
+    -------
+    module : Module
+        The module with dropout enabled.
+    """
+    for m in module.modules():
+        if m.__class__.__name__.startswith("Dropout"):
+            m.train()
+
+
+def get_activation_layer(name: str, **kwargs) -> Module:
+    """
+    This function creates an activation layer instance given its name and arguments.
 
     Parameters
     ----------
@@ -51,54 +80,66 @@ def get_activation_layer(name: str, **kwargs):
     Returns
     -------
     layer : Module
-        The activation module.
+        The activation layer.
     """
-    if name.upper() == "RELU":
-        return ReLU(**kwargs)
-    elif name.upper() == "LEAKYRELU":
-        return LeakyReLU(**kwargs)
-    elif name.upper() == "TANH":
-        return Tanh()
-    elif name.upper() == "SIGMOID":
-        return Sigmoid()
-    elif name.upper() == "PRELU":
-        return PReLU(**kwargs)
+    act_type = Act[name]
+    layer = act_type(**kwargs)
 
-    else:
-        raise ValueError(f"Activation function {name} not supported.")
+    return layer
 
 
-def get_normalization_layer(name: str, **kwargs):
+def get_dropout_layer(
+        name: str,
+        dropout_dim: int,
+        **kwargs
+) -> Module:
+    """
+    This function gets a dropout layer.
+
+    Parameters
+    ----------
+    name : str
+        The name of the dropout type.
+    dropout_dim : int
+        The dropout dimension.
+    **kwargs
+        The parameters of the dropout module.
+
+    Returns
+    -------
+    layer : Module
+        The dropout layer.
+    """
+    dropout_type = Dropout[name, dropout_dim]
+    layer = dropout_type(**kwargs)
+
+    return layer
+
+
+def get_normalization_layer(
+        name: str,
+        spatial_dim: int,
+        **kwargs
+) -> Module:
     """
     This function gets a normalization module given its name and arguments.
 
     Parameters
     ----------
     name : str
-        The name of the normalization function.
+        The name of the normalization type.
+    spatial_dim : int
+        The number of spatial dimensions of the normalization's input
     **kwargs
-        The parameters of the normalization function.
+        The parameters of the normalization module.
 
     Returns
     -------
     layer : Module
-        The normalization module.
+        The normalization layer.
     """
-    pass
+    norm_type = Norm[name, spatial_dim]
+    layer = norm_type(**kwargs)
 
+    return layer
 
-def get_dropout_layer(prob: float):
-    """
-    This function gets a dropout layer.
-
-    Parameters
-    ----------
-    prob : float
-        The dropout probability.
-
-    Returns
-    -------
-    layer : Module
-        The dropout module.
-    """
-    pass

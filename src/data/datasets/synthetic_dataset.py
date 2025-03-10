@@ -3,7 +3,7 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
     @Description:       This file contains the class SyntheticDataset that is used as a Torch Dataset for Torch models.
 """
@@ -46,22 +46,22 @@ class SyntheticDataset(Dataset):
         """
         super().__init__()
 
-        self.data: List[SyntheticData] = data
+        self._data: List[SyntheticData] = data
 
     def __len__(self) -> int:
         """
-        Gets dataset length.
+        The length of the dataset.
 
         Returns
         -------
         length : int
             The length of the dataset.
         """
-        return len(self.data)
+        return len(self._data)
 
     def __getitem__(self, index: int) -> DataObservation:
         """
-        Gets items from the dataset.
+        Gets an item from the dataset.
 
         Parameters
         ----------
@@ -74,8 +74,8 @@ class SyntheticDataset(Dataset):
             The data observation of the given index.
         """
         item = DataObservation(
-            x=tensor(self.data[index].x, dtype=float32),
-            y=tensor(self.data[index].y, dtype=float32)
+            x=tensor(self._data[index].x, dtype=float32),
+            y=tensor(self._data[index].y, dtype=float32)
         )
 
         return item

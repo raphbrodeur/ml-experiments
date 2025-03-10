@@ -3,11 +3,11 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
-    @Description:       This file contains different aleatoric uncertainties types and their base class
+    @Description:       This file contains different aleatoric uncertainty types and their base class
                         UncertaintyDistribution. This file also contains the AleatoricUncertainty NamedTuple for storing
-                        the aleatoric uncertainty to apply on features (see error-in-variables) and on targets. These
+                        the aleatoric uncertainty to apply on features (see error-in-variables) and targets. These
                         classes are used for data generation.
 """
 
@@ -20,8 +20,8 @@ from numpy.random import normal
 
 class UncertaintyDistribution(ABC):
     """
-    This class defines the abstract class UncertaintyDistribution. This class serves as a base class for all random
-    distributions used as aleatoric uncertainty by the data generation processes.
+    This class serves as a base class for all random distributions used as aleatoric uncertainty by data generation
+    processes.
     """
 
     def __init__(self):
@@ -50,18 +50,28 @@ class UncertaintyDistribution(ABC):
 
 class NormalUncertainty(UncertaintyDistribution):
     """
-    This class defines a normal random distribution to be used as normal (gaussian) aleatoric uncertainty.
+    This class defines a normal (gaussian) random distribution for aleatoric uncertainty.
     """
 
     def __init__(
             self,
             mean: float = 0.0,
-            std: float = 1.0
+            standard_deviation: float = 1.0
     ):
+        """
+        Initializes the class.
+
+        Parameters
+        ----------
+        mean : float
+            The mean of the normal distribution. Defaults to 0.0.
+        standard_deviation : float
+            The standard deviation of the normal distribution. Defaults to 1.0.
+        """
         super().__init__()
 
-        self.mean = mean
-        self.std = std
+        self._mean = mean
+        self._std = standard_deviation
 
     def sample(self, signal: ndarray) -> ndarray:
         """
@@ -77,7 +87,7 @@ class NormalUncertainty(UncertaintyDistribution):
         noise : ndarray
             The sampled noise for each input signal. Has shape (num_signals, ...).
         """
-        noise = normal(self.mean, self.std, signal.shape)
+        noise = normal(self._mean, self._std, signal.shape)
 
         return noise
 

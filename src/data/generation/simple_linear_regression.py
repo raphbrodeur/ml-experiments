@@ -3,7 +3,7 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
     @Description:       This file contains the generation process of simple linear regression data. The underlying
                         deterministic function is defined as:
@@ -39,16 +39,16 @@ class SimpleLinearRegression(DataGenerationProcess):
         Parameters
         ----------
         a : float
-            The value of coefficient a.
+            The value of coefficient a. Defaults to 0.5.
         b : float
-            The value of coefficient b.
+            The value of coefficient b. Defaults to 1.0.
         aleatoric_uncertainty : Optional[AleatoricUncertainty]
-            The aleatoric uncertainty of the DGP.
+            The aleatoric uncertainty of the DGP. Defaults to None.
         """
         super().__init__(aleatoric_uncertainty=aleatoric_uncertainty)
 
-        self.a: float = a
-        self.b: float = b
+        self._a: float = a
+        self._b: float = b
 
     def deterministic_function(self, x: ndarray) -> ndarray:
         """
@@ -65,4 +65,4 @@ class SimpleLinearRegression(DataGenerationProcess):
         y : np.ndarray
             The observations' targets y. Has shape (num_obs, ...).
         """
-        return self.a * x + self.b
+        return self._a * x + self._b

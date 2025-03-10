@@ -3,7 +3,7 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
     @Description:       This file contains the abstract class DataGenerationProcess that serves as a base class for all
                         data generation processes.
@@ -45,14 +45,14 @@ class DataGenerationProcess(ABC):
         Parameters
         ----------
         aleatoric_uncertainty : Optional[AleatoricUncertainty]
-            The aleatoric uncertainty of the DGP.
+            The aleatoric uncertainty of the DGP. Defaults to no uncertainty.
         """
         super().__init__()
 
         if aleatoric_uncertainty is None:
             aleatoric_uncertainty = AleatoricUncertainty()
 
-        self.aleatoric_uncertainty = aleatoric_uncertainty
+        self._aleatoric_uncertainty = aleatoric_uncertainty
 
     @abstractmethod
     def deterministic_function(self, x: ndarray) -> ndarray:
@@ -72,7 +72,19 @@ class DataGenerationProcess(ABC):
         """
         raise NotImplementedError
 
-    def aleatoric_uncertainty_terms(self, x: ndarray) -> Tuple[ndarray, ndarray]:
+    @property
+    def aleatoric_uncertainty(self) -> AleatoricUncertainty:
+        """
+        The aleatoric uncertainty of the DGP.
+
+        Returns
+        -------
+        aleatoric_uncertainty : AleatoricUncertainty
+             The aleatoric uncertainty of the DGP.
+        """
+        return self._aleatoric_uncertainty
+
+    def _aleatoric_uncertainty_terms(self, x: ndarray) -> Tuple[ndarray, ndarray]:
         """
         Gets error terms representing aleatoric uncertainty for given observations' features x and targets y.
 
@@ -88,18 +100,18 @@ class DataGenerationProcess(ABC):
             uncertainty terms.
         """
         # Features uncertainty (for errors-in-variables cases, measurement errors)
-        if self.aleatoric_uncertainty.feature_uncertainty is None:
+        if self._aleatoric_uncertainty.feature_uncertainty is None:
             x_unc = zeros(len(x))   # len(x) is the number of observations
-        elif isinstance(self.aleatoric_uncertainty.feature_uncertainty, UncertaintyDistribution):
-            x_unc = self.aleatoric_uncertainty.feature_uncertainty.sample(x)
+        elif isinstance(self._aleatoric_uncertainty.feature_uncertainty, UncertaintyDistribution):
+            x_unc = self._aleatoric_uncertainty.feature_uncertainty.sample(x)
         else:
             raise Exception("Not a valid measure uncertainty distribution.")
 
         # Target uncertainty
-        if self.aleatoric_uncertainty.target_uncertainty is None:
+        if self._aleatoric_uncertainty.target_uncertainty is None:
             y_unc = zeros(len(x))   # len(x) is the number of observations
-        elif isinstance(self.aleatoric_uncertainty.target_uncertainty, UncertaintyDistribution):
-            y_unc = self.aleatoric_uncertainty.target_uncertainty.sample(x)
+        elif isinstance(self._aleatoric_uncertainty.target_uncertainty, UncertaintyDistribution):
+            y_unc = self._aleatoric_uncertainty.target_uncertainty.sample(x)
         else:
             raise Exception("Not a valid aleatoric target uncertainty type")
 
@@ -107,11 +119,15 @@ class DataGenerationProcess(ABC):
 
     def sample_data(self, x: ndarray) -> List[SyntheticData]:
         """
-        Samples a dataset from the DGP. Takes as input the observations' features x of the dataset to be sampled rather
+        Samples a dataset from the DGP.
+
+        Takes as input the observations' features x of the dataset to be sampled rather
         than simply the amount of observations to sample so that domain is inherently defined. Also, in practice, a
         dataset's domain can often be chosen (e.g. choosing to include more observations of some class in a training set
         or test set). For a random domain, one can simply input a sampled ndarray of observations features.
 
+        Notes
+        -----
         Note that error terms are added to the features x only after the deterministic parts of the targets y have been
         calculated. This is more truthful to an error-in-variable/measurement error situation; the target is associated
         to the true but unobserved regressor. See https://en.wikipedia.org/wiki/Errors-in-variables_model.
@@ -129,7 +145,7 @@ class DataGenerationProcess(ABC):
         y = self.deterministic_function(x)
 
         # Error terms are added to x after deterministic y(x) has been calculated. See error-in-variables models.
-        x_unc, y_unc = self.aleatoric_uncertainty_terms(x)
+        x_unc, y_unc = self._aleatoric_uncertainty_terms(x)
 
         synthetic_data = []
         for i in range(len(x)):     # len(x) is the number of observations.

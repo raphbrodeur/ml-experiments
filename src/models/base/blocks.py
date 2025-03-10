@@ -3,30 +3,34 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
     @Description:       This file contains blocks and modules used to build torch models.
 """
 
-from typing import Optional, Sequence
+from typing import Dict, Optional, Sequence, Tuple, Union
 
-from torch.nn import Dropout, Linear, Sequential
+from torch.nn import Linear, Sequential
 
-from src.models.base.utils import get_activation_layer
+from src.models.base.utils import (
+    get_activation_layer,
+    get_dropout_layer,
+    get_normalization_layer
+)
 
 
-class NAD(Sequential):
+class ADN(Sequential):
     """
-    This class constructs a sequential module of optional normalization (N), activation (A), and dropout (D) layers with
+    This class constructs a sequential module of optional activation, dropout, and normalization layers with
     a given ordering. Inspired by the ADN module from MONAI.
     """
 
     def __init__(
             self,
-            ordering: str = "NAD",
-            norm: Optional[str] = None,
-            act: Optional[str] = None,
-            dropout: Optional[float] = None
+            ordering: str = "NDA",
+            activation: Optional[Union[str, Tuple[str, Dict]]] = None,
+            dropout: Optional[Union[float, Tuple[str, Dict]]] = None,
+            normalization: Optional[Union[str, Tuple[str, Dict]]] = None
     ):
         """
         Initializes the NAD module.
@@ -34,26 +38,50 @@ class NAD(Sequential):
         Parameters
         ----------
         ordering : str
-            The ordering of the normalization, activation, and dropout layers. Defaults to "NAD".
-        norm : Optional[str]
-            The normalization layer to use. Defaults to None.
-        act : Optional[str]
-            The activation layer to use. Defaults to None.
-        dropout : Optional[float]
-            The dropout probability to use. Defaults to None.
+            The ordering of the activation (A), dropout (D) and normalization (N) layers. Defaults to "NAD".
+        activation : Optional[Union[str, Tuple[str, Dict]]]
+            The activation layer to add. Optional. Either the activation's name (str) or a tuple of the name (str) and
+            a dictionary of keyword arguments. Defaults to None.
+        dropout : Optional[Union[float, Tuple[str, Dict]]]
+            The dropout layer to add. Optional. Either the dropout probability (float) for default dropout or a tuple of
+            the dropout layer's name and a dictionary of keyword arguments. Defaults to None.
+        normalization : Optional[Union[str, Tuple[str, Dict]]]
+            The normalization layer to use. Optional Defaults to None.
         """
         super().__init__()
 
-        module_dict = {"N": None, "A": None, "D": None}
+        module_dict = {"A": None, "D": None, "N": None}
 
-        if norm is not None:
-            pass
+        if activation is not None:
+            if isinstance(activation, str):
+                act_name = activation
+                act_kwargs = {}
+            else:
+                act_name, act_kwargs = activation
 
-        if act is not None:
-            pass
+            module_dict["A"] = get_activation_layer(name=act_name, **act_kwargs)
 
         if dropout is not None:
-            pass
+            if isinstance(dropout, float):
+                dropout_name = "dropout"
+                dropout_kwargs = {"p": float(dropout)}
+            else:
+                dropout_name, dropout_kwargs = dropout
+
+            module_dict["D"] = get_dropout_layer(name=dropout_name, dropout_dim=1, **dropout_kwargs)
+
+        if normalization is not None:
+            if isinstance(normalization, str):
+                norm_name = normalization
+                norm_kwargs = {}
+            else:
+                norm_name, norm_kwargs = normalization
+
+            module_dict["N"] = get_normalization_layer(name=norm_name, spatial_dim=1, **norm_kwargs)
+
+        for module in ordering:
+            if module_dict[module] is not None:
+                self.add_module(name=module, module=module_dict[module])
 
 
 class MLPBlock(Sequential):
@@ -64,8 +92,9 @@ class MLPBlock(Sequential):
     def __init__(
             self,
             hidden_channels_width: Sequence[int],
-            activation: str = "PReLU",
-            dropout: float = 0.0
+            activation: str = "prelu",
+            dropout: float = 0.2,
+            normalization: str = "instance"
     ):
         """
         Initializes the MLP module.
@@ -88,9 +117,16 @@ class MLPBlock(Sequential):
             # Linear layer
             layer.add_module("Linear", Linear(in_features=input_width, out_features=width))
 
-            # NAD
-            layer.add_module(activation, get_activation_layer(name=activation))
-            layer.add_module("Dropout", Dropout(p=dropout))
+            # ADN
+            layer.add_module(
+                name="ADN",
+                module=ADN(
+                    ordering="NDA",
+                    activation=activation,
+                    dropout=dropout,
+                    normalization=normalization
+                )
+            )
 
             self.add_module(f"Layer_{i}", layer)
 

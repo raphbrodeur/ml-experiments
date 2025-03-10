@@ -3,7 +3,7 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
     @Description:       This file contains the generation process of simple regression data. The underlying
                         deterministic function is defined as:
@@ -44,32 +44,32 @@ class SimpleWigglyRegression(DataGenerationProcess):
         Parameters
         ----------
         a : float
-            The value of coefficient a.
+            The value of coefficient a. Defaults to 1.0.
         b : float
-            The value of coefficient b.
+            The value of coefficient b. Defaults to -10.0.
         c : float
-            The value of coefficient c.
+            The value of coefficient c. Defaults to 1.0.
         d : float
-            The value of coefficient d.
+            The value of coefficient d. Defaults to 1.0.
         i : int
-            The value of exponent i.
+            The value of exponent i. Defaults to 2.
         j : int
-            The value of exponent j.
+            The value of exponent j. Defaults to 1.
         k : int
-            The value of exponent k.
+            The value of exponent k. Defaults to 1.
         aleatoric_uncertainty : Optional[AleatoricUncertainty]
-            The aleatoric uncertainty of the DGP.
+            The aleatoric uncertainty of the DGP. Defaults to None.
         """
         super().__init__(aleatoric_uncertainty=aleatoric_uncertainty)
 
-        self.a: float = a
-        self.b: float = b
-        self.c: float = c
-        self.d: float = d
+        self._a: float = a
+        self._b: float = b
+        self._c: float = c
+        self._d: float = d
 
-        self.i: int = i
-        self.j: int = j
-        self.k: int = k
+        self._i: int = i
+        self._j: int = j
+        self._k: int = k
 
     def deterministic_function(self, x: ndarray) -> ndarray:
         """
@@ -86,4 +86,4 @@ class SimpleWigglyRegression(DataGenerationProcess):
         y : np.ndarray
             The observations' targets y. Has shape (num_obs, ...).
         """
-        return self.a * (x ** self.i) + self.b * (sin(self.c * x) ** self.j) * (cos(self.d * x) ** self.k)
+        return self._a * (x ** self._i) + self._b * (sin(self._c * x) ** self._j) * (cos(self._d * x) ** self._k)

@@ -3,7 +3,7 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
     @Description:       This file contains utility functions for visualization.
 """
@@ -13,52 +13,71 @@ from typing import List, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import torch.nn as nn
 
-from src.data.generation import DataGenerationProcess, NormalUncertainty, SyntheticData
+from src.data.generation import DataGenerationProcess, SyntheticData
 
 
 def plot_dgp(
         dgp: DataGenerationProcess,
-        sampled_data: Optional[List[SyntheticData]] = None,
-        domain: np.ndarray = np.linspace(-3, 3, 1000)
+        domain: Optional[np.ndarray] = None,
+        data: Optional[List[SyntheticData]] = None,
+        num_samples: int = 3000
 ):
     """
-    Plots the data generation process (DGP) in a general way. Currently, only implemented for R^1 -> R^1 DGP's with
-    optional aleatoric normal uncertainty centered at 0. Treats such aleatoric uncertainty by filling the ±2 standard
-    deviations' region.
+    This function is a generic way to plot any R^1 -> R^1 data generation process (DGP) and its sampled data. Plots the
+    mean image over multiple datasets sampled from a given domain and colors the ± 2 standard deviations' interval. Can
+    plot data.
 
     Parameters
     ----------
     dgp : DataGenerationProcess
         The data generation process to plot.
-    sampled_data : Optional[List[SyntheticData]]
-        The generated data to plot. If None, only the DGP function is plotted. Defaults to None.
     domain : ndarray
-        The domain over which to plot the DGP. Defaults to np.linspace(-3, 3, 1000).
+        The domain over which to plot the DGP. Defaults to numpy.linspace(-10, 10, 1000).
+    data : Optional[List[SyntheticData]]
+        The data to plot. Optional. Defaults to None.
+    num_samples : int
+        The number of datasets to sample from the DGP. Defaults to 3000.
+
+    Raises
+    ------
+    Exception
+        If feature uncertainty is not None
     """
     if dgp.aleatoric_uncertainty.feature_uncertainty is not None:
-        raise Exception("Visualization not implemented for feature uncertainty (error-in-variables).")
+        raise Exception("Not implemented for feature uncertainty (error-in-variables).")
 
     fig, ax = plt.subplots()
 
-    # Plot the DGP's deterministic (or mean function)
-    image = dgp.deterministic_function(domain)
-    ax.plot(domain, image, label="DGP", zorder=2)
+    # Sample data from the DGP
+    sampled_images = []
+    for _ in range(num_samples):
+        sampled_data = dgp.sample_data(domain)
+        sampled_images.append(
+            np.array([sampled_data[i].y[0] for i in range(len(domain))])
+        )
 
-    # Plot the aleatoric uncertainty
-    if isinstance(dgp.aleatoric_uncertainty.target_uncertainty, NormalUncertainty):
+    image_mean = np.mean(sampled_images, axis=0)    # The mean image of the sampled images
+    image_std = np.std(sampled_images, axis=0)      # The standard deviation of the sampled images
+
+    # Plot the DGP
+    ax.plot(domain, image_mean, zorder=1)
+
+    # Plot the target aleatoric uncertainty
+    if dgp.aleatoric_uncertainty.target_uncertainty is not None:
         ax.fill_between(
             domain,
-            image - 2 * dgp.aleatoric_uncertainty.target_uncertainty.std,
-            image + 2 * dgp.aleatoric_uncertainty.target_uncertainty.std,
+            image_mean - 2 * image_std,
+            image_mean + 2 * image_std,
             color="gray",
             zorder=0
         )
 
-    # Plot the sampled data
-    if sampled_data is not None:
-        for data in sampled_data:
-            ax.scatter(data.x, data.y, color="black", zorder=1)
+    # Overlay data
+    if data is not None:
+        for data_point in data:
+            ax.scatter(data_point.x, data_point.y, color="black", zorder=2)
 
     # Axis labels
     ax.set_xlabel("x")
@@ -71,20 +90,45 @@ def plot_dgp(
 
 
 def plot_trained_model(
-        model,
-        training_data,
-        domain: np.ndarray = np.linspace(-10, 10, 1000)
+        model: nn.Module,
+        domain: Optional[np.ndarray] = None,
+        device: Optional[torch.device] = None,
+        training_data: Optional[List[SyntheticData]] = None
 ):
     """
-    Description.
+    This function is a generic way to any R^1 -> R^1 trained model and its training data on a given domain.
+
+    Parameters
+    ----------
+    model : nn.Module
+        The trained Torch model.
+    domain : Optional[np.ndarray]
+        The domain over which to plot the trained model. Defaults to numpy.linspace(-10, 10, 1000).
+    device : Optional[torch.device]
+        The device on which to evaluate the model. Defaults to GPU with index 0 if cuda is available, otherwise defaults
+        to CPU.
+    training_data : Optional[List[SyntheticData]]
+        The data to plot. Optional. Defaults to None.
     """
-    fig, ax = plt.subplots()  # Create plot
-    domain_torch = torch.tensor([[domain[i]] for i in range(len(domain))], dtype=torch.float32)
+    if domain is None:
+        domain = np.linspace(-10, 10, 1000)
+    if device is None:
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    model.to(device)    # Set module device
+
+    fig, ax = plt.subplots()
+
+    # Create torch tensor on appropriate device for domain
+    domain_torch = torch.tensor(
+        [[domain[i]] for i in range(len(domain))],
+        dtype=torch.float32
+    ).to(device)
 
     model.eval()
     with torch.no_grad():
-        y_pred = model(domain_torch)
-        y_pred = y_pred.cpu().numpy()
+        y_pred = model(domain_torch)    # Model inference on domain
+        y_pred = y_pred.cpu().numpy()   # Convert to ndarray and move to CPU for plotting
 
     ax.plot(domain, y_pred, label='trained model', color='red', zorder=3)  # Plot trained model
 

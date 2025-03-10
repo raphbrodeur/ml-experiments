@@ -3,9 +3,9 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
-    @Description:       This file contains the abstract class Model that serves as a base class for all torch models.
+    @Description:       This file contains the base class for all Torch models.
 """
 
 from abc import ABC, abstractmethod

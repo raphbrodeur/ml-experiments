@@ -3,7 +3,7 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 02/2025
+    @Last modification: 03/2025
 
     @Description:       This file contains a simple MLP model.
 """
@@ -12,7 +12,7 @@ from typing import Optional, Sequence
 
 from torch import Tensor
 from torch.nn import Module
-from torch.optim import AdamW
+from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 from src.data.datasets import SyntheticDataset
@@ -28,7 +28,8 @@ class MLP(Model):
             self,
             hidden_channels_width: Sequence[int],
             activation: str,
-            dropout: float
+            dropout: Optional[float],
+            normalization: Optional[str]
     ):
         """
         Initializes the MLP model.
@@ -38,6 +39,7 @@ class MLP(Model):
         self.hidden_channels_width: Sequence[int] = hidden_channels_width
         self.activation: str = activation
         self.dropout: float = dropout
+        self.normalization = normalization
 
         self.mlp: Optional[Module] = None
 
@@ -50,7 +52,8 @@ class MLP(Model):
         self.mlp = MLPBlock(
             hidden_channels_width=self.hidden_channels_width,
             activation=self.activation,
-            dropout=self.dropout
+            dropout=self.dropout,
+            normalization=self.normalization
         )
 
     @check_if_built
@@ -70,6 +73,7 @@ class MLP(Model):
         """
         return self.mlp(x)
 
+    @check_if_built
     def train_mse(
             self,
             ds: SyntheticDataset,
@@ -81,10 +85,12 @@ class MLP(Model):
         """
         loader = DataLoader(
             dataset=ds,
-            batch_size=64
+            batch_size=16,
+            shuffle=True,
+            pin_memory=True
         )
 
-        opt = AdamW(
+        opt = Adam(
             params=self.parameters(),
             lr=lr
         )
@@ -94,8 +100,8 @@ class MLP(Model):
             self.train()
 
             for batch in loader:
-                x = batch.x
-                y = batch.y
+                x = batch.x.to("cuda:0")
+                y = batch.y.to("cuda:0")
 
                 opt.zero_grad()
 
