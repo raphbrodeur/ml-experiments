@@ -74,8 +74,8 @@ class SyntheticDataset(Dataset):
             The data observation of the given index.
         """
         item = DataObservation(
-            x=tensor(self._data[index].x, dtype=float32),
-            y=tensor(self._data[index].y, dtype=float32)
+            x=tensor(self._data[index].x, dtype=float32).unsqueeze(1),
+            y=tensor(self._data[index].y, dtype=float32).unsqueeze(1)
         )
 
         return item
