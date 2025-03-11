@@ -86,6 +86,9 @@ def plot_dgp(
     # Set x-axis limits
     ax.set_xlim(np.min(domain), np.max(domain))
 
+    ax.set_xlim(-1.2, 2)
+    ax.set_ylim(-2, 2)
+
     plt.show()
 
 

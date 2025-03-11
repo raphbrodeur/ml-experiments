@@ -86,7 +86,7 @@ class MLP(Model):
         """
         loader = DataLoader(
             dataset=ds,
-            batch_size=16,
+            batch_size=64,
             shuffle=True,
             pin_memory=True
         )
