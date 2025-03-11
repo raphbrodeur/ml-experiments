@@ -38,16 +38,25 @@ class ADN(Sequential):
         Parameters
         ----------
         ordering : str
-            The ordering of the activation (A), dropout (D) and normalization (N) layers. Defaults to "NAD".
+            The ordering of the activation (A), dropout (D) and normalization (N) layers. Defaults to "NDA".
         activation : Optional[Union[str, Tuple[str, Dict]]]
-            The activation layer to add. Optional. Either the activation's name (str) or a tuple of the name (str) and
-            a dictionary of keyword arguments. Defaults to None.
+            The activation layer to add. Optional. Either the activation's name (str) or a tuple of the name and a
+            dictionary of keyword arguments. Defaults to None.
         dropout : Optional[Union[float, Tuple[str, Dict]]]
             The dropout layer to add. Optional. Either the dropout probability (float) for default dropout or a tuple of
-            the dropout layer's name and a dictionary of keyword arguments. Defaults to None.
+            the dropout layer's name (str) and a dictionary of keyword arguments. Defaults to None.
         normalization : Optional[Union[str, Tuple[str, Dict]]]
-            The normalization layer to use. Optional Defaults to None.
+            The normalization layer to add. Optional. Either the normalization's name (str) or a tuple of the name
+            and a dictionary of keyword arguments. Defaults to None.
+
+        Raises
+        ------
+        Exception
+            If activation, dropout and normalization are all set to None.
         """
+        if activation is None and dropout is None and normalization is None:
+            raise Exception("Initializing an empty ADN block.")
+
         super().__init__()
 
         module_dict = {"A": None, "D": None, "N": None}
@@ -86,15 +95,15 @@ class ADN(Sequential):
 
 class MLPBlock(Sequential):
     """
-    This class constructs an MLP with optional normalization, activation, and dropout.
+    This class constructs an MLP with optional activation, dropout and normalization.
     """
 
     def __init__(
             self,
             hidden_channels_width: Sequence[int],
-            activation: str = "prelu",
-            dropout: float = 0.2,
-            normalization: str = "instance"
+            activation: Optional[Union[str, Tuple[str, Dict]]] = "PReLU",
+            dropout: Optional[Union[float, Tuple[str, Dict]]] = None,
+            normalization: Optional[Union[str, Tuple[str, Dict]]] = None,
     ):
         """
         Initializes the MLP module.
@@ -103,10 +112,15 @@ class MLPBlock(Sequential):
         ----------
         hidden_channels_width : Sequence[int]
             The width of the hidden layers.
-        activation : str
-            The activation function to use. Defaults to "PReLU".
-        dropout : float
-            The dropout probability to use. Defaults to 0.0.
+        activation : Optional[Union[str, Tuple[str, Dict]]]
+            The activation layer to use. Optional. Either the activation's name (str) or a tuple of the name and a
+            dictionary of keyword arguments. Defaults to "PReLU".
+        dropout :  Optional[Union[float, Tuple[str, Dict]]]
+            The dropout layer to use. Optional. Either the dropout probability (float) for default dropout or a tuple of
+            the dropout layer's name and a dictionary of keyword arguments. Defaults to None.
+        normalization : Optional[Union[str, Tuple[str, Dict]]]
+            The normalization layer to use. Optional. Either the normalization's name (str) or a tuple of the name
+            and a dictionary of keyword arguments. Defaults to None.
         """
         super().__init__()
 

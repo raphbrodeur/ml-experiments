@@ -142,4 +142,3 @@ def get_normalization_layer(
     layer = norm_type(**kwargs)
 
     return layer
-

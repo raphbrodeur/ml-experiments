@@ -10,7 +10,7 @@
 
 from typing import Optional, Sequence
 
-from torch import Tensor
+from torch import Tensor, device
 from torch.nn import Module
 from torch.optim import Adam
 from torch.utils.data import DataLoader
@@ -36,12 +36,12 @@ class MLP(Model):
         """
         super().__init__()
 
-        self.hidden_channels_width: Sequence[int] = hidden_channels_width
-        self.activation: str = activation
-        self.dropout: float = dropout
-        self.normalization = normalization
+        self._hidden_channels_width: Sequence[int] = hidden_channels_width
+        self._activation: str = activation
+        self._dropout: float = dropout
+        self._normalization = normalization
 
-        self.mlp: Optional[Module] = None
+        self._mlp: Optional[Module] = None
 
     def build(self):
         """
@@ -49,11 +49,11 @@ class MLP(Model):
         """
         super().build()
 
-        self.mlp = MLPBlock(
-            hidden_channels_width=self.hidden_channels_width,
-            activation=self.activation,
-            dropout=self.dropout,
-            normalization=self.normalization
+        self._mlp = MLPBlock(
+            hidden_channels_width=self._hidden_channels_width,
+            activation=self._activation,
+            dropout=self._dropout,
+            normalization=self._normalization
         )
 
     @check_if_built
@@ -71,17 +71,18 @@ class MLP(Model):
         y : Tensor
             The output tensor.
         """
-        return self.mlp(x)
+        return self._mlp(x)
 
     @check_if_built
     def train_mse(
             self,
             ds: SyntheticDataset,
             lr: float,
-            num_epoch: int
+            num_epoch: int,
+            dev: device
     ):
         """
-        Temporary method; an actual trainer will be implemented.
+        Temporary method! An actual trainer will be implemented.
         """
         loader = DataLoader(
             dataset=ds,
@@ -100,8 +101,8 @@ class MLP(Model):
             self.train()
 
             for batch in loader:
-                x = batch.x.to("cuda:0")
-                y = batch.y.to("cuda:0")
+                x = batch.x.to(dev)
+                y = batch.y.to(dev)
 
                 opt.zero_grad()
 
