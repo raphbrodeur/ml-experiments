@@ -17,7 +17,7 @@ from src.models.base.layer_factory import Act, Dropout, Norm
 
 def check_if_built(func: Callable) -> Callable:
     """
-    This decorator is used to ensure that the model has been built before calling the decorated method.
+    This decorator ensures that the model has been built before calling the decorated method.
 
     Parameters
     ----------
@@ -37,7 +37,7 @@ def check_if_built(func: Callable) -> Callable:
     def _wrapper(*args, **kwargs):
         self = args[0]
 
-        if not self._is_built:
+        if not self.is_built:
             raise Exception(
                 f"The model has to be built using the 'build' method prior to calling the method {func.__name__}."
             )
@@ -68,7 +68,7 @@ def enable_dropout(module: Module):
 
 def get_activation_layer(name: str, **kwargs) -> Module:
     """
-    This function creates an activation layer instance given its name and arguments.
+    This function creates an activation layer given its name and arguments.
 
     Parameters
     ----------
@@ -94,7 +94,7 @@ def get_dropout_layer(
         **kwargs
 ) -> Module:
     """
-    This function gets a dropout layer.
+    This function creates a dropout layer.
 
     Parameters
     ----------
@@ -122,7 +122,7 @@ def get_normalization_layer(
         **kwargs
 ) -> Module:
     """
-    This function gets a normalization module given its name and arguments.
+    This function creates a normalization layer.
 
     Parameters
     ----------

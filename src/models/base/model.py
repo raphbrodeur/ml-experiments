@@ -29,6 +29,13 @@ class Model(Module, ABC):
 
         self._is_built: bool = False
 
+    @property
+    def is_built(self) -> bool:
+        """
+        Whether the model has been built with the build() method.
+        """
+        return self._is_built
+
     def build(self):
         """
         Builds the model and initializes weights.

@@ -73,7 +73,7 @@ class LayerFactory:
     @property
     def factories(self) -> Tuple[str, ...]:
         """
-        Names of factory functions registered to the class.
+        The names of the factory functions registered to the class.
         """
         return tuple(self._factories)
 

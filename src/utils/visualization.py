@@ -94,7 +94,7 @@ def plot_dgp(
 
 def numpy_input_to_torch_input(numpy_batch: np.ndarray) -> torch.Tensor:
     """
-    Converts a numpy batch with shape (N, ...) to a torch batch with shape (N, C, ...).
+    This function converts a numpy batch with shape (N, ...) to a torch batch with shape (N, C, ...).
 
     Parameters
     ----------
@@ -121,7 +121,7 @@ def plot_trained_model(
         training_data: Optional[List[SyntheticData]] = None
 ):
     """
-    This function is a generic way to any R^1 -> R^1 trained model and its training data on a given domain.
+    This function is a generic way to plot any R^1 -> R^1 trained model and its training data on a given domain.
 
     Parameters
     ----------

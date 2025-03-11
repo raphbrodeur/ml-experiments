@@ -20,9 +20,10 @@ from src.data.generation.base import AleatoricUncertainty, DataGenerationProcess
 
 class SimpleWigglyRegression(DataGenerationProcess):
     """
-    This class generates simple regression data. The data generation process (DGP) is decomposed into a
-    deterministic function and stochastic terms representing aleatoric uncertainty. The underlying deterministic
-    function is defined as:
+    This class generates simple regression data.
+
+    The data generation process (DGP) is decomposed into a deterministic function and stochastic terms representing
+    aleatoric uncertainty. The underlying deterministic function is defined as:
         R^1 -> R^1
         x ↦ a * x^i + b * sin^j(c * x) * cos^k(d * x)
     """

@@ -32,7 +32,7 @@ class MLP(Model):
             normalization: Optional[str]
     ):
         """
-        Initializes the MLP model.
+        Initializes the MLP.
         """
         super().__init__()
 

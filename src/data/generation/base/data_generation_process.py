@@ -34,8 +34,9 @@ class SyntheticData(NamedTuple):
 
 class DataGenerationProcess(ABC):
     """
-    This class serves as a base class for all data generation processes (DGPs). The DGP is decomposed into a
-    deterministic function and stochastic terms representing aleatoric uncertainty.
+    This class serves as a base class for all data generation processes (DGPs).
+
+    The DGP is decomposed into a deterministic function and stochastic terms representing aleatoric uncertainty.
     """
 
     def __init__(self, aleatoric_uncertainty: Optional[AleatoricUncertainty] = None):
@@ -121,10 +122,10 @@ class DataGenerationProcess(ABC):
         """
         Samples a dataset from the DGP.
 
-        Takes as input the observations' features x of the dataset to be sampled rather
-        than simply the amount of observations to sample so that domain is inherently defined. Also, in practice, a
-        dataset's domain can often be chosen (e.g. choosing to include more observations of some class in a training set
-        or test set). For a random domain, one can simply input a sampled ndarray of observations features.
+        Takes as input the observations' features x of the dataset to be sampled rather than simply the amount of
+        observations to sample so that domain is inherently defined. Also, in practice, a dataset's domain can often be
+        chosen (e.g. choosing to include more observations of some class in a training set or test set). For a random
+        domain, one can simply input a sampled ndarray of observations features.
 
         Notes
         -----
