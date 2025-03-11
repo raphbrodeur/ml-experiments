@@ -89,6 +89,28 @@ def plot_dgp(
     plt.show()
 
 
+def numpy_input_to_torch_input(numpy_batch: np.ndarray) -> torch.Tensor:
+    """
+    Converts a numpy batch with shape (N, ...) to a torch batch with shape (N, C, ...).
+
+    Parameters
+    ----------
+    numpy_batch : np.ndarray
+        The numpy input to convert. Has shape (N, ...)
+
+    Returns
+    -------
+    torch_batch : torch.Tensor
+        The torch input. Has shape (N, C, ...)
+    """
+    torch_batch = torch.tensor(
+        [[numpy_batch[i]] for i in range(len(numpy_batch))],
+        dtype=torch.float32
+    ).unsqueeze(1)
+
+    return torch_batch
+
+
 def plot_trained_model(
         model: nn.Module,
         domain: Optional[np.ndarray] = None,
@@ -120,15 +142,14 @@ def plot_trained_model(
     fig, ax = plt.subplots()
 
     # Create torch tensor on appropriate device for domain
-    domain_torch = torch.tensor(
-        [[domain[i]] for i in range(len(domain))],
-        dtype=torch.float32
-    ).to(device)
+    domain_torch = numpy_input_to_torch_input(domain).to(device)
 
     model.eval()
     with torch.no_grad():
         y_pred = model(domain_torch)    # Model inference on domain
-        y_pred = y_pred.cpu().numpy()   # Convert to ndarray and move to CPU for plotting
+
+        # Remove channel dim, convert to ndarray and move to CPU for plotting
+        y_pred = y_pred.squeeze(1).cpu().numpy()
 
     ax.plot(domain, y_pred, label='trained model', color='red', zorder=3)  # Plot trained model
 
