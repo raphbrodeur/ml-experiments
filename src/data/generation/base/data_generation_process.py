@@ -10,9 +10,18 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import List, NamedTuple, Optional, Tuple
+from typing import (
+    List,
+    NamedTuple,
+    Optional,
+    Tuple
+)
 
-from numpy import atleast_1d, ndarray, zeros
+from numpy import (
+    atleast_1d,
+    ndarray,
+    zeros
+)
 
 from src.data.generation.base.aleatoric_uncertainty import AleatoricUncertainty, UncertaintyDistribution
 
@@ -53,7 +62,7 @@ class DataGenerationProcess(ABC):
         if aleatoric_uncertainty is None:
             aleatoric_uncertainty = AleatoricUncertainty()
 
-        self._aleatoric_uncertainty = aleatoric_uncertainty
+        self._aleatoric_uncertainty: AleatoricUncertainty = aleatoric_uncertainty
 
     @abstractmethod
     def deterministic_function(self, x: ndarray) -> ndarray:
@@ -103,18 +112,14 @@ class DataGenerationProcess(ABC):
         # Features uncertainty (for errors-in-variables cases, measurement errors)
         if self._aleatoric_uncertainty.feature_uncertainty is None:
             x_unc = zeros(len(x))   # len(x) is the number of observations
-        elif isinstance(self._aleatoric_uncertainty.feature_uncertainty, UncertaintyDistribution):
-            x_unc = self._aleatoric_uncertainty.feature_uncertainty.sample(x)
         else:
-            raise Exception("Not a valid measure uncertainty distribution.")
+            x_unc = self._aleatoric_uncertainty.feature_uncertainty.sample(x)
 
         # Target uncertainty
         if self._aleatoric_uncertainty.target_uncertainty is None:
             y_unc = zeros(len(x))   # len(x) is the number of observations
-        elif isinstance(self._aleatoric_uncertainty.target_uncertainty, UncertaintyDistribution):
-            y_unc = self._aleatoric_uncertainty.target_uncertainty.sample(x)
         else:
-            raise Exception("Not a valid aleatoric target uncertainty type")
+            y_unc = self._aleatoric_uncertainty.target_uncertainty.sample(x)
 
         return x_unc, y_unc
 

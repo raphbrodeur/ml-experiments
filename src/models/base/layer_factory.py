@@ -10,7 +10,14 @@
                         Function registration is done with a decorator. Inspired by MONAI.
 """
 
-from typing import Any, Callable, Dict, Tuple, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Tuple,
+    Type,
+    Union
+)
 
 import torch.nn as nn
 
@@ -51,7 +58,7 @@ class LayerFactory:
         args : str | Tuple
             The arguments specifying which layer class to get. Either a string of the factory's name or a tuple whose
             first element is the name of the factory and whose remaining elements are positional arguments of the
-            factory function.
+            factory function. e.g. "relu" for nn.ReLU or ("batch", 2) for nn.BatchNorm2d.
 
         Returns
         -------
@@ -91,7 +98,15 @@ class LayerFactory:
             The name of the factory function.
         func : Callable
             The factory function to add.
+
+        Raises
+        ------
+        ValueError
+            If a factory function is already registered under the same name.
         """
+        if name.upper() in self.factories:
+            raise ValueError(f"Factory function already registered under the name {name}.")
+
         self._factories[name.upper()] = func
 
     def register_factory_function(self, name: str) -> Callable:
@@ -108,7 +123,6 @@ class LayerFactory:
         _wrapper : Callable
             The decorated function.
         """
-
         def _wrapper(func: Callable) -> Callable:
             self._add_factory_function(name=name, func=func)
             return func

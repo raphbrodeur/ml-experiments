@@ -10,7 +10,11 @@
 
 from typing import List, NamedTuple
 
-from torch import float32, Tensor, tensor
+from torch import (
+    float32,
+    Tensor,
+    tensor
+)
 from torch.utils.data import Dataset
 
 from src.data.generation import SyntheticData

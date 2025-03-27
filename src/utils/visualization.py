@@ -27,7 +27,7 @@ def plot_dgp(
     """
     This function is a generic way to plot any R^1 -> R^1 data generation process (DGP) and its sampled data. Plots the
     mean image over multiple datasets sampled from a given domain and colors the ± 2 standard deviations' interval. Can
-    plot data.
+    also plot data points over the DGP.
 
     Parameters
     ----------
@@ -46,7 +46,7 @@ def plot_dgp(
         If feature uncertainty is not None
     """
     if dgp.aleatoric_uncertainty.feature_uncertainty is not None:
-        raise Exception("Not implemented for feature uncertainty (error-in-variables).")
+        raise Exception("Visualization not yet implemented for feature uncertainty (error-in-variables).")
 
     fig, ax = plt.subplots()
 

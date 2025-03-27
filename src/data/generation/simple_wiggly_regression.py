@@ -13,7 +13,11 @@
 
 from typing import Optional
 
-from numpy import cos, ndarray, sin
+from numpy import (
+    cos,
+    ndarray,
+    sin
+)
 
 from src.data.generation.base import AleatoricUncertainty, DataGenerationProcess
 

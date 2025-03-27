@@ -10,13 +10,14 @@
 
 from typing import Optional, Sequence
 
-from torch import Tensor, device
+from torch import Tensor
 from torch.nn import Module
-from torch.optim import Adam
-from torch.utils.data import DataLoader
 
-from src.data.datasets import SyntheticDataset
-from src.models.base import check_if_built, MLPBlock, Model
+from src.models.base import (
+    check_if_built,
+    MLPBlock,
+    Model
+)
 
 
 class MLP(Model):
@@ -37,15 +38,15 @@ class MLP(Model):
         super().__init__()
 
         self._hidden_channels_width: Sequence[int] = hidden_channels_width
-        self._activation: str = activation
-        self._dropout: float = dropout
-        self._normalization = normalization
+        self._activation: Optional[str] = activation
+        self._dropout: Optional[float] = dropout
+        self._normalization: Optional[str] = normalization
 
         self._mlp: Optional[Module] = None
 
     def build(self):
         """
-        Builds the model and initializes weights.
+        Builds the model and initializes the weights.
         """
         super().build()
 
@@ -72,50 +73,3 @@ class MLP(Model):
             The output tensor.
         """
         return self._mlp(x)
-
-    @check_if_built
-    def train_mse(
-            self,
-            ds: SyntheticDataset,
-            lr: float,
-            num_epoch: int,
-            dev: device
-    ):
-        """
-        Temporary method! An actual trainer will be implemented.
-        """
-        loader = DataLoader(
-            dataset=ds,
-            batch_size=64,
-            shuffle=True,
-            pin_memory=True
-        )
-
-        opt = Adam(
-            params=self.parameters(),
-            lr=lr
-        )
-
-        for epoch in range(num_epoch):
-            # Training
-            self.train()
-
-            for batch in loader:
-                x = batch.x.to(dev)
-                y = batch.y.to(dev)
-
-                opt.zero_grad()
-
-                # Forward pass
-                y_pred = self.forward(x)
-
-                # Calculate cost
-                mse = (y - y_pred) ** 2
-                cost = mse.mean()
-                print(f"At epoch {epoch}, batch cost MSE = {cost}")
-
-                # Backward pass
-                cost.backward()
-                opt.step()
-
-            print("Training done.")

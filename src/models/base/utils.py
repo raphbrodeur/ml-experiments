@@ -12,7 +12,11 @@ from typing import Callable
 
 from torch.nn import Module
 
-from src.models.base.layer_factory import Act, Dropout, Norm
+from src.models.base.layer_factory import (
+    Act,
+    Dropout,
+    Norm
+)
 
 
 def check_if_built(func: Callable) -> Callable:
@@ -34,6 +38,7 @@ def check_if_built(func: Callable) -> Callable:
     Exception
         If model has not been built with .build() method.
     """
+
     def _wrapper(*args, **kwargs):
         self = args[0]
 
@@ -55,11 +60,6 @@ def enable_dropout(module: Module):
     ----------
     module : Module
         The module for which to enable dropout.
-
-    Returns
-    -------
-    module : Module
-        The module with dropout enabled.
     """
     for m in module.modules():
         if m.__class__.__name__.startswith("Dropout"):

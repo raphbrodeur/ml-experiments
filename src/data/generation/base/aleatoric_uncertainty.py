@@ -5,10 +5,10 @@
     @Creation Date:     02/2025
     @Last modification: 03/2025
 
-    @Description:       This file contains different aleatoric uncertainty types and their base class
-                        UncertaintyDistribution. This file also contains the AleatoricUncertainty NamedTuple for storing
-                        the aleatoric uncertainty to apply on features (see error-in-variables) and targets. These
-                        classes are used for data generation.
+    @Description:       This file contains multiple aleatoric uncertainty types and their base class
+                        UncertaintyDistribution. This file also contains the AleatoricUncertainty NamedTuple used to
+                        store the aleatoric uncertainty to apply on features (see error-in-variables) and targets of a
+                        data generation process.
 """
 
 from abc import ABC, abstractmethod
@@ -70,8 +70,8 @@ class NormalUncertainty(UncertaintyDistribution):
         """
         super().__init__()
 
-        self._mean = mean
-        self._std = standard_deviation
+        self._mean: float = mean
+        self._std: float = standard_deviation
 
     def sample(self, signal: ndarray) -> ndarray:
         """
