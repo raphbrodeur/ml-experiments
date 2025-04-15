@@ -65,7 +65,7 @@ def plot_dgp(
     ax.plot(domain, image_mean, zorder=1)
 
     # Plot the target aleatoric uncertainty
-    if dgp.aleatoric_uncertainty.target_uncertainty is not None:
+    if dgp.aleatoric_uncertainty.label_uncertainty is not None:
         ax.fill_between(
             domain,
             image_mean - 2 * image_std,

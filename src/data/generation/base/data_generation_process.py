@@ -3,7 +3,7 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 03/2025
+    @Last modification: 04/2025
 
     @Description:       This file contains the abstract class DataGenerationProcess that serves as a base class for all
                         data generation processes.
@@ -23,19 +23,19 @@ from numpy import (
     zeros
 )
 
-from src.data.generation.base.aleatoric_uncertainty import AleatoricUncertainty, UncertaintyDistribution
+from src.data.generation.base.aleatoric_uncertainty import AleatoricUncertainty
 
 
 class SyntheticData(NamedTuple):
     """
-    Stores a single observation of synthetic data.
+    Stores a single example of synthetic data.
 
     Elements
     --------
     x : ndarray
-        The observation's features x.
+        The example's features.
     y : ndarray
-        The observation's target y.
+        The example's labels.
     """
     x: ndarray
     y: ndarray
@@ -67,18 +67,18 @@ class DataGenerationProcess(ABC):
     @abstractmethod
     def deterministic_function(self, x: ndarray) -> ndarray:
         """
-        Gets the deterministic component of target value y for a given observation's features x according to the DGP's
+        Gets the deterministic component of each label for given examples' features according to the DGP's
         underlying deterministic function.
 
         Parameters
         ----------
         x : np.ndarray
-            The observations' features x. Has shape (num_obs, ...).
+            The examples' features. Has shape (num_examples, ...).
 
         Returns
         -------
         y : np.ndarray
-            The observations' targets y. Has shape (num_obs, ...).
+            The examples' labels. Has shape (num_examples, ...).
         """
         raise NotImplementedError
 
@@ -96,30 +96,29 @@ class DataGenerationProcess(ABC):
 
     def _aleatoric_uncertainty_terms(self, x: ndarray) -> Tuple[ndarray, ndarray]:
         """
-        Gets error terms representing aleatoric uncertainty for given observations' features x and targets y.
+        Gets uncertainty terms representing aleatoric uncertainty of given examples' features and labels.
 
         Parameters
         ----------
         x : np.ndarray
-            The observations' features x before considering feature uncertainty. Has shape (num_obs, ...).
+            The examples' features before considering feature uncertainty. Has shape (num_examples, ...).
 
         Returns
         -------
         uncertainty : Tuple[ndarray, ndarray]
-            A tuple containing the observations' features x uncertainty terms and the observations' targets (y)
-            uncertainty terms.
+            A tuple containing the examples' features uncertainty terms and the examples' labels uncertainty terms.
         """
         # Features uncertainty (for errors-in-variables cases, measurement errors)
         if self._aleatoric_uncertainty.feature_uncertainty is None:
-            x_unc = zeros(len(x))   # len(x) is the number of observations
+            x_unc = zeros(len(x))   # len(x) is the number of examples
         else:
-            x_unc = self._aleatoric_uncertainty.feature_uncertainty.sample(x)
+            x_unc = self._aleatoric_uncertainty.feature_uncertainty.sample_noise(x)
 
-        # Target uncertainty
-        if self._aleatoric_uncertainty.target_uncertainty is None:
-            y_unc = zeros(len(x))   # len(x) is the number of observations
+        # Label uncertainty
+        if self._aleatoric_uncertainty.label_uncertainty is None:
+            y_unc = zeros(len(x))   # len(x) is the number of examples
         else:
-            y_unc = self._aleatoric_uncertainty.target_uncertainty.sample(x)
+            y_unc = self._aleatoric_uncertainty.label_uncertainty.sample_noise(x)
 
         return x_unc, y_unc
 
@@ -127,34 +126,35 @@ class DataGenerationProcess(ABC):
         """
         Samples a dataset from the DGP.
 
-        Takes as input the observations' features x of the dataset to be sampled rather than simply the amount of
-        observations to sample so that domain is inherently defined. Also, in practice, a dataset's domain can often be
-        chosen (e.g. choosing to include more observations of some class in a training set or test set). For a random
-        domain, one can simply input a sampled ndarray of observations features.
+        Takes as input the features (or approximate features if uncertainty is applied to features) of the examples to
+        sample rather than simply the amount of examples to sample so that domain is inherently defined. Moreover, this
+        reflects reality better as in practice a dataset's domain can often be chosen (e.g. choosing to include more
+        examples of some class in a training set or test set). To sample truly random examples, one can simply input a
+        random ndarray of examples' features.
 
         Notes
         -----
-        Note that error terms are added to the features x only after the deterministic parts of the targets y have been
-        calculated. This is more truthful to an error-in-variable/measurement error situation; the target is associated
-        to the true but unobserved regressor. See https://en.wikipedia.org/wiki/Errors-in-variables_model.
+        Note that uncertainty terms are added to the features only after the deterministic parts of the labels have been
+        calculated. This is more truthful to an error-in-variable/measurement-error situation; the label is tied to the
+        true but unobserved features. See https://en.wikipedia.org/wiki/Errors-in-variables_model.
 
         Parameters
         ----------
         x : ndarray
-            The observations' features x. Has shape (num_obs, ...).
+            The examples' features. Has shape (num_examples, ...).
 
         Returns
         -------
         synthetic_data : List[SyntheticData]
-            A list of SyntheticData named tuples. Each item of the list is a different observation.
+            A list of SyntheticData named tuples. Has length num_examples.
         """
         y = self.deterministic_function(x)
 
-        # Error terms are added to x after deterministic y(x) has been calculated. See error-in-variables models.
+        # Error terms are added to x after deterministic y=f(x) has been calculated. See error-in-variables models.
         x_unc, y_unc = self._aleatoric_uncertainty_terms(x)
 
         synthetic_data = []
-        for i in range(len(x)):     # len(x) is the number of observations.
+        for i in range(len(x)):     # len(x) is the number of examples.
             synthetic_data.append(
                 SyntheticData(
                     x=atleast_1d(x[i] + x_unc[i]),
