@@ -3,12 +3,12 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 03/2025
+    @Last modification: 04/2025
 
-    @Description:       This file contains different aleatoric uncertainty types and their base class
-                        UncertaintyDistribution. This file also contains the AleatoricUncertainty NamedTuple for storing
-                        the aleatoric uncertainty to apply on features (see error-in-variables) and targets. These
-                        classes are used for data generation.
+    @Description:       This file contains multiple aleatoric uncertainty types and their base class
+                        UncertaintyDistribution. This file also contains the AleatoricUncertainty NamedTuple used to
+                        store the aleatoric uncertainty to apply on features (see error-in-variables) and labels of
+                        examples produced by a data generation process.
 """
 
 from abc import ABC, abstractmethod
@@ -31,7 +31,7 @@ class UncertaintyDistribution(ABC):
         super().__init__()
 
     @abstractmethod
-    def sample(self, signal: ndarray) -> ndarray:
+    def sample_noise(self, signal: ndarray) -> ndarray:
         """
         Samples noise from a random distribution for given signals.
 
@@ -70,10 +70,10 @@ class NormalUncertainty(UncertaintyDistribution):
         """
         super().__init__()
 
-        self._mean = mean
-        self._std = standard_deviation
+        self._mean: float = mean
+        self._std: float = standard_deviation
 
-    def sample(self, signal: ndarray) -> ndarray:
+    def sample_noise(self, signal: ndarray) -> ndarray:
         """
         Samples noise from a normal (gaussian) distribution for given signals.
 
@@ -94,15 +94,14 @@ class NormalUncertainty(UncertaintyDistribution):
 
 class AleatoricUncertainty(NamedTuple):
     """
-    Stores the aleatoric uncertainty to apply to targets y and features x (for error-in-variable simulations).
+    Stores the aleatoric uncertainty to apply to features (x) (for error-in-variable simulations) and labels (y).
 
     Elements
     --------
-    feature_uncertainty : Optional[UncertaintyDistribution]
-        The uncertainty on features x. See error-in-variables, measurement error. Either None,
-        NormalUncertainty, ...
-    target_uncertainty : Optional[UncertaintyDistribution]
-        The uncertainty on targets y. Either None, NormalUncertainty, ...
+    x_uncertainty : Optional[UncertaintyDistribution]
+        The uncertainty on features (x). See error-in-variables, measurement error. Either None, NormalUncertainty, ...
+    y_uncertainty : Optional[UncertaintyDistribution]
+        The uncertainty on labels (y). Either None, NormalUncertainty, ...
     """
-    feature_uncertainty: Optional[UncertaintyDistribution] = None
-    target_uncertainty: Optional[UncertaintyDistribution] = None
+    x_uncertainty: Optional[UncertaintyDistribution] = None
+    y_uncertainty: Optional[UncertaintyDistribution] = None

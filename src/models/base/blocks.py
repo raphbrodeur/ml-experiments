@@ -8,7 +8,12 @@
     @Description:       This file contains blocks and modules used to build torch models.
 """
 
-from typing import Dict, Optional, Sequence, Tuple, Union
+from typing import (
+    Dict,
+    Optional,
+    Sequence,
+    Tuple
+)
 
 from torch.nn import Linear, Sequential
 
@@ -28,26 +33,33 @@ class ADN(Sequential):
     def __init__(
             self,
             ordering: str = "NDA",
-            activation: Optional[Union[str, Tuple[str, Dict]]] = None,
-            dropout: Optional[Union[float, Tuple[str, Dict]]] = None,
-            normalization: Optional[Union[str, Tuple[str, Dict]]] = None
+            activation: Optional[str | Tuple[str, Dict]] = None,
+            dropout: Optional[float | Tuple[str, Dict]] = None,
+            normalization: Optional[str | Tuple[str, Dict]] = None,
+            dropout_dim: int = 1,
+            normalization_dim: int = 1
     ):
         """
-        Initializes the NAD module.
+        Initializes the ADN module.
 
         Parameters
         ----------
         ordering : str
             The ordering of the activation (A), dropout (D) and normalization (N) layers. Defaults to "NDA".
-        activation : Optional[Union[str, Tuple[str, Dict]]]
+        activation : Optional[str | Tuple[str, Dict]]
             The activation layer to add. Optional. Either the activation's name (str) or a tuple of the name and a
             dictionary of keyword arguments. Defaults to None.
-        dropout : Optional[Union[float, Tuple[str, Dict]]]
+        dropout : Optional[float | Tuple[str, Dict]]
             The dropout layer to add. Optional. Either the dropout probability (float) for default dropout or a tuple of
             the dropout layer's name (str) and a dictionary of keyword arguments. Defaults to None.
-        normalization : Optional[Union[str, Tuple[str, Dict]]]
+        normalization : Optional[str | Tuple[str, Dict]]
             The normalization layer to add. Optional. Either the normalization's name (str) or a tuple of the name
             and a dictionary of keyword arguments. Defaults to None.
+        dropout_dim : int
+            The dimension of the dropout layer for spatial dropout (from the paper "Efficient Object Localization Using
+            Convolutional Networks"; drops entire channels instead of individual elements). Defaults to 1.
+        normalization_dim : int
+            The spatial dimensions for the normalization layer. Defaults to 1.
 
         Raises
         ------
@@ -77,7 +89,7 @@ class ADN(Sequential):
             else:
                 dropout_name, dropout_kwargs = dropout
 
-            module_dict["D"] = get_dropout_layer(name=dropout_name, dropout_dim=1, **dropout_kwargs)
+            module_dict["D"] = get_dropout_layer(name=dropout_name, dropout_dim=dropout_dim, **dropout_kwargs)
 
         if normalization is not None:
             if isinstance(normalization, str):
@@ -86,7 +98,7 @@ class ADN(Sequential):
             else:
                 norm_name, norm_kwargs = normalization
 
-            module_dict["N"] = get_normalization_layer(name=norm_name, spatial_dim=1, **norm_kwargs)
+            module_dict["N"] = get_normalization_layer(name=norm_name, spatial_dim=normalization_dim, **norm_kwargs)
 
         for module in ordering:
             if module_dict[module] is not None:
@@ -95,36 +107,45 @@ class ADN(Sequential):
 
 class MLPBlock(Sequential):
     """
-    This class constructs an MLP with optional activation, dropout and normalization.
+    This class constructs an MLP with optional activation, dropout and normalization with an arbitrary number of layers.
     """
 
     def __init__(
             self,
+            input_features: int,
             hidden_channels_width: Sequence[int],
-            activation: Optional[Union[str, Tuple[str, Dict]]] = "PReLU",
-            dropout: Optional[Union[float, Tuple[str, Dict]]] = None,
-            normalization: Optional[Union[str, Tuple[str, Dict]]] = None,
+            output_features: int,
+            activation: Optional[str | Tuple[str, Dict]] = "PReLU",
+            dropout: Optional[float | Tuple[str, Dict]] = None,
+            normalization: Optional[str | Tuple[str, Dict]] = None,
+            ordering: str = "NDA"
     ):
         """
         Initializes the MLP module.
 
         Parameters
         ----------
+        input_features : int
+            The number of features of the MLP's input.
         hidden_channels_width : Sequence[int]
             The width of the hidden layers.
-        activation : Optional[Union[str, Tuple[str, Dict]]]
+        output_features : int
+            The number of features of the MLP's output.
+        activation : Optional[str | Tuple[str, Dict]]
             The activation layer to use. Optional. Either the activation's name (str) or a tuple of the name and a
             dictionary of keyword arguments. Defaults to "PReLU".
-        dropout :  Optional[Union[float, Tuple[str, Dict]]]
+        dropout :  Optional[float | Tuple[str, Dict]]
             The dropout layer to use. Optional. Either the dropout probability (float) for default dropout or a tuple of
             the dropout layer's name and a dictionary of keyword arguments. Defaults to None.
-        normalization : Optional[Union[str, Tuple[str, Dict]]]
+        normalization : Optional[str | Tuple[str, Dict]]
             The normalization layer to use. Optional. Either the normalization's name (str) or a tuple of the name
             and a dictionary of keyword arguments. Defaults to None.
+        ordering : str
+            The ordering of the activation (A), dropout (D) and normalization (N) layers. Defaults to "NDA".
         """
         super().__init__()
 
-        input_width: int = 1
+        input_width: int = input_features
         for i, width in enumerate(hidden_channels_width):
             layer = Sequential()
 
@@ -135,7 +156,7 @@ class MLPBlock(Sequential):
             layer.add_module(
                 name="ADN",
                 module=ADN(
-                    ordering="NDA",
+                    ordering=ordering,
                     activation=activation,
                     dropout=dropout,
                     normalization=normalization
@@ -147,5 +168,5 @@ class MLPBlock(Sequential):
             input_width = width
 
         final_layer = Sequential()
-        final_layer.add_module("Linear", Linear(in_features=input_width, out_features=1))
+        final_layer.add_module("Linear", Linear(in_features=input_width, out_features=output_features))
         self.add_module("Layer_final", final_layer)

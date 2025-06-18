@@ -3,10 +3,10 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 03/2025
+    @Last modification: 04/2025
 
-    @Description:       This file contains the generation process of simple linear regression data. The underlying
-                        deterministic function is defined as:
+    @Description:       This file contains the generation process of simple linear regression data examples. The
+                        underlying deterministic function is defined as:
                             R^1 -> R^1
                             x ↦ a * x + b
 """
@@ -20,7 +20,7 @@ from src.data.generation.base import AleatoricUncertainty, DataGenerationProcess
 
 class SimpleLinearRegression(DataGenerationProcess):
     """
-    This class generates simple linear regression data.
+    This class generates simple linear regression data examples.
 
     The data generation process (DGP) is decomposed into a deterministic function and stochastic terms representing
     aleatoric uncertainty. The underlying deterministic function is defined as:
@@ -53,17 +53,17 @@ class SimpleLinearRegression(DataGenerationProcess):
 
     def deterministic_function(self, x: ndarray) -> ndarray:
         """
-        Gets the deterministic component of target value y for a given observation's features x according to the DGP's
-        underlying deterministic function.
+        Gets the deterministic component of the labels for given examples' features according to the DGP's underlying
+        deterministic function.
 
         Parameters
         ----------
         x : np.ndarray
-            The observations' features x. Has shape (num_obs, ...).
+            The examples' features. Has shape (num_examples, ...).
 
         Returns
         -------
         y : np.ndarray
-            The observations' targets y. Has shape (num_obs, ...).
+            The examples' labels. Has shape (num_examples, ...).
         """
         return self._a * x + self._b

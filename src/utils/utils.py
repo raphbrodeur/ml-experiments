@@ -5,7 +5,7 @@
     @Creation Date:     03/2025
     @Last modification: 03/2025
 
-    @Description:       This file contains utility functions for training models.
+    @Description:       This file contains utility functions.
 """
 
 import random

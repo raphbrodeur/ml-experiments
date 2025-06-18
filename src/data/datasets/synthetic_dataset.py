@@ -3,29 +3,33 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 03/2025
+    @Last modification: 04/2025
 
     @Description:       This file contains the class SyntheticDataset that is used as a Torch Dataset for Torch models.
 """
 
 from typing import List, NamedTuple
 
-from torch import float32, Tensor, tensor
+from torch import (
+    float32,
+    Tensor,
+    tensor
+)
 from torch.utils.data import Dataset
 
 from src.data.generation import SyntheticData
 
 
-class DataObservation(NamedTuple):
+class DataExample(NamedTuple):
     """
-    Stores an observation's data.
+    Stores an example's features and labels.
 
     Elements
     --------
     x : Tensor
-        The observation's features x.
+        The example's features.
     y : Tensor
-        The observation's target y.
+        The example's labels.
     """
     x: Tensor
     y: Tensor
@@ -59,7 +63,7 @@ class SyntheticDataset(Dataset):
         """
         return len(self._data)
 
-    def __getitem__(self, index: int) -> DataObservation:
+    def __getitem__(self, index: int) -> DataExample:
         """
         Gets an item from the dataset.
 
@@ -70,10 +74,10 @@ class SyntheticDataset(Dataset):
 
         Returns
         -------
-        item : DataObservation
-            The data observation of the given index.
+        item : DataExample
+            The data example of the given index.
         """
-        item = DataObservation(
+        item = DataExample(
             x=tensor(self._data[index].x, dtype=float32).unsqueeze(1),
             y=tensor(self._data[index].y, dtype=float32).unsqueeze(1)
         )

@@ -3,9 +3,9 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     02/2025
-    @Last modification: 03/2025
+    @Last modification: 04/2025
 
-    @Description:       This file contains the generation process of simple regression data. The underlying
+    @Description:       This file contains the generation process of simple regression data examples. The underlying
                         deterministic function is defined as:
                             R^1 -> R^1
                             x ↦ a * x^i + b * sin^j(c * x) * cos^k(d * x)
@@ -13,14 +13,18 @@
 
 from typing import Optional
 
-from numpy import cos, ndarray, sin
+from numpy import (
+    cos,
+    ndarray,
+    sin
+)
 
 from src.data.generation.base import AleatoricUncertainty, DataGenerationProcess
 
 
 class SimpleWigglyRegression(DataGenerationProcess):
     """
-    This class generates simple regression data.
+    This class generates simple regression data examples.
 
     The data generation process (DGP) is decomposed into a deterministic function and stochastic terms representing
     aleatoric uncertainty. The underlying deterministic function is defined as:
@@ -74,17 +78,17 @@ class SimpleWigglyRegression(DataGenerationProcess):
 
     def deterministic_function(self, x: ndarray) -> ndarray:
         """
-        Gets the deterministic component of target value y for a given observation's features x according to the DGP's
-        underlying deterministic function.
+        Gets the deterministic component of the labels for given examples' features according to the DGP's underlying
+        deterministic function.
 
         Parameters
         ----------
         x : np.ndarray
-            The observations' features x. Has shape (num_obs, ...).
+            The examples' features. Has shape (num_examples, ...).
 
         Returns
         -------
         y : np.ndarray
-            The observations' targets y. Has shape (num_obs, ...).
+            The examples' labels y. Has shape (num_examples, ...).
         """
         return self._a * (x ** self._i) + self._b * (sin(self._c * x) ** self._j) * (cos(self._d * x) ** self._k)
