@@ -64,17 +64,11 @@ if __name__ == "__main__":
         input_features=1,
         hidden_channels_width=[1024, 1024, 1024, 1024],
         output_features=1,
-        activation="relu"
+        activation="relu",
+        dropout=0.2
     )
 
-    # Other model configurations can be set here :
-    # model = MLP(
-    #     input_features=1,
-    #     hidden_channels_width=[1024, 1024, 1024, 1024],
-    #     output_features=1,
-    #     activation="relu",
-    #     dropout=0.2
-    # )
+    # Other model configurations can be set here, for example:
     # model = MLP(
     #     input_features=1,
     #     hidden_channels_width=[1024, 1024, 1024, 1024],
