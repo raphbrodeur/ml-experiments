@@ -43,10 +43,10 @@ def plot_dgp(
     Raises
     ------
     Exception
-        If feature uncertainty is not None
+        If feature (x) uncertainty is not None
     """
-    if dgp.aleatoric_uncertainty.feature_uncertainty is not None:
-        raise Exception("Visualization not yet implemented for feature uncertainty (error-in-variables).")
+    if dgp.aleatoric_uncertainty.x_uncertainty is not None:
+        raise Exception("Visualization not yet implemented for feature (x) uncertainty (error-in-variables).")
 
     fig, ax = plt.subplots()
 
@@ -64,8 +64,8 @@ def plot_dgp(
     # Plot the DGP
     ax.plot(domain, image_mean, zorder=1)
 
-    # Plot the target aleatoric uncertainty
-    if dgp.aleatoric_uncertainty.label_uncertainty is not None:
+    # Plot the target (y) aleatoric uncertainty
+    if dgp.aleatoric_uncertainty.y_uncertainty is not None:
         ax.fill_between(
             domain,
             image_mean - 2 * image_std,

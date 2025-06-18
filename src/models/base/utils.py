@@ -129,7 +129,7 @@ def get_normalization_layer(
     name : str
         The name of the normalization type.
     spatial_dim : int
-        The number of spatial dimensions of the normalization's input
+        The number of spatial dimensions of the normalization's input.
     **kwargs
         The parameters of the normalization module.
 

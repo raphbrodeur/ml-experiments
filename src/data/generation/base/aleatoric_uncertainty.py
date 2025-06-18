@@ -98,11 +98,10 @@ class AleatoricUncertainty(NamedTuple):
 
     Elements
     --------
-    feature_uncertainty : Optional[UncertaintyDistribution]
-        The uncertainty on features (x). See error-in-variables, measurement error. Either None,
-        NormalUncertainty, ...
-    label_uncertainty : Optional[UncertaintyDistribution]
+    x_uncertainty : Optional[UncertaintyDistribution]
+        The uncertainty on features (x). See error-in-variables, measurement error. Either None, NormalUncertainty, ...
+    y_uncertainty : Optional[UncertaintyDistribution]
         The uncertainty on labels (y). Either None, NormalUncertainty, ...
     """
-    feature_uncertainty: Optional[UncertaintyDistribution] = None
-    label_uncertainty: Optional[UncertaintyDistribution] = None
+    x_uncertainty: Optional[UncertaintyDistribution] = None
+    y_uncertainty: Optional[UncertaintyDistribution] = None

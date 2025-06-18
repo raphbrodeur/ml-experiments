@@ -3,7 +3,7 @@
     @Author:            Raphael Brodeur
 
     @Creation Date:     03/2025
-    @Last modification: 04/2025
+    @Last modification: 06/2025
 
     @Description:       This file contains layer factories for activation, convolution, dropout, normalization, padding
                         and pooling layers. Factory functions are registered to instances of the class LayerFactory().
@@ -215,8 +215,13 @@ Dropout = LayerFactory()
 
 
 @Dropout.register_factory_function("dropout")
-def dropout_factory(dim: int) -> Type[Union[nn.Dropout, nn.Dropout2d, nn.Dropout3d]]:
-    types = [nn.Dropout, nn.Dropout2d, nn.Dropout3d]
+def dropout_factory(_dim) -> Type[nn.Dropout]:
+    return nn.Dropout
+
+
+@Dropout.register_factory_function("spatialdropout")
+def spatial_dropout_factory(dim: int) -> Type[Union[nn.Dropout1d, nn.Dropout2d, nn.Dropout3d]]:
+    types = [nn.Dropout1d, nn.Dropout2d, nn.Dropout3d]
     return types[dim - 1]
 
 

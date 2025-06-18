@@ -217,3 +217,35 @@ class Model(Module, ABC):
             net.learn["adam-mse"](args)
         """
         return self._learning_algorithms
+
+    @check_if_built
+    def eval(self):
+        """
+        Overrides the .eval() method of torch.nn.Module to ensure that the model is built before calling. Calls the
+        underlying torch.nn.Module method with the provided arguments.
+        """
+        return super().eval()
+
+    @check_if_built
+    def load_state_dict(self, *args, **kwargs):
+        """
+        Overrides the .load_state_dict() method of torch.nn.Module to ensure that the model is built before calling.
+        Calls the underlying torch.nn.Module method with the provided arguments.
+        """
+        return super().load_state_dict(*args, **kwargs)
+
+    @check_if_built
+    def to(self, *args, **kwargs):
+        """
+        Overrides the .to() method of torch.nn.Module to ensure that the model is built before calling. Calls the
+        underlying torch.nn.Module method with the provided arguments.
+        """
+        return super().to(*args, **kwargs)
+
+    @check_if_built
+    def train(self, *args, **kwargs):
+        """
+        Overrides the .train() method of torch.nn.Module to ensure that the model is built before calling. Calls the
+        underlying torch.nn.Module method with the provided arguments.
+        """
+        return super().train(*args, **kwargs)

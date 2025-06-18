@@ -67,7 +67,7 @@ class DataGenerationProcess(ABC):
     @abstractmethod
     def deterministic_function(self, x: ndarray) -> ndarray:
         """
-        Gets the deterministic component of each label for given examples' features according to the DGP's
+        Gets the deterministic component of each label (y) for given examples' features (x) according to the DGP's
         underlying deterministic function.
 
         Parameters
@@ -96,29 +96,30 @@ class DataGenerationProcess(ABC):
 
     def _aleatoric_uncertainty_terms(self, x: ndarray) -> Tuple[ndarray, ndarray]:
         """
-        Gets uncertainty terms representing aleatoric uncertainty of given examples' features and labels.
+        Gets uncertainty terms representing aleatoric uncertainty of given examples' features (x) and labels (y).
 
         Parameters
         ----------
         x : np.ndarray
-            The examples' features before considering feature uncertainty. Has shape (num_examples, ...).
+            The examples' features before considering feature (x) uncertainty. Has shape (num_examples, ...).
 
         Returns
         -------
         uncertainty : Tuple[ndarray, ndarray]
-            A tuple containing the examples' features uncertainty terms and the examples' labels uncertainty terms.
+            A tuple containing the examples' features (x) uncertainty terms and the examples' labels (y) uncertainty
+            terms.
         """
-        # Features uncertainty (for errors-in-variables cases, measurement errors)
-        if self._aleatoric_uncertainty.feature_uncertainty is None:
+        # Features (x) uncertainty (for errors-in-variables cases, measurement errors)
+        if self._aleatoric_uncertainty.x_uncertainty is None:
             x_unc = zeros(len(x))   # len(x) is the number of examples
         else:
-            x_unc = self._aleatoric_uncertainty.feature_uncertainty.sample_noise(x)
+            x_unc = self._aleatoric_uncertainty.x_uncertainty.sample_noise(x)
 
-        # Label uncertainty
-        if self._aleatoric_uncertainty.label_uncertainty is None:
+        # Label (y) uncertainty
+        if self._aleatoric_uncertainty.y_uncertainty is None:
             y_unc = zeros(len(x))   # len(x) is the number of examples
         else:
-            y_unc = self._aleatoric_uncertainty.label_uncertainty.sample_noise(x)
+            y_unc = self._aleatoric_uncertainty.y_uncertainty.sample_noise(x)
 
         return x_unc, y_unc
 
@@ -126,17 +127,17 @@ class DataGenerationProcess(ABC):
         """
         Samples a dataset from the DGP.
 
-        Takes as input the features (or approximate features if uncertainty is applied to features) of the examples to
-        sample rather than simply the amount of examples to sample so that domain is inherently defined. Moreover, this
-        reflects reality better as in practice a dataset's domain can often be chosen (e.g. choosing to include more
-        examples of some class in a training set or test set). To sample truly random examples, one can simply input a
-        random ndarray of examples' features.
+        Takes as input the features (x) (or approximate features if uncertainty is applied to features) of the examples
+        to sample rather than simply the amount of examples to sample so that domain is inherently defined. Moreover,
+        this reflects reality better as in practice a dataset's domain can often be chosen (e.g. choosing to include
+        more examples of some class in a training set or test set). To sample truly random examples, one can simply
+        input a random ndarray of examples' features.
 
         Notes
         -----
-        Note that uncertainty terms are added to the features only after the deterministic parts of the labels have been
-        calculated. This is more truthful to an error-in-variable/measurement-error situation; the label is tied to the
-        true but unobserved features. See https://en.wikipedia.org/wiki/Errors-in-variables_model.
+        Note that uncertainty terms are added to the features (x) only after the deterministic parts of the labels have
+        been calculated. This is more truthful to an error-in-variable/measurement-error situation; the label is tied to
+        the true but unobserved features. See https://en.wikipedia.org/wiki/Errors-in-variables_model.
 
         Parameters
         ----------
