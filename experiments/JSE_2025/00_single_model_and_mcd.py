@@ -1,14 +1,3 @@
-"""
-    @file:              train_and_test_model.py
-    @Author:            Raphael Brodeur
-
-    @Creation Date:     06/2025
-    @Last modification: 06/2025
-
-    @Description:       This file contains an example experiment of training and testing a model as well as Monte-Carlo
-                        Dropout.
-"""
-
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -23,6 +12,7 @@ from src.data.generation import (
 )
 from src.models import enable_dropout, MLP
 from src.utils import numpy_input_to_torch_input, set_determinism
+
 
 if __name__ == "__main__":
     # Set random seed for reproducibility
@@ -68,19 +58,6 @@ if __name__ == "__main__":
         dropout=0.2
     )
 
-    # Other model configurations can be set here, for example:
-    # model = MLP(
-    #     input_features=1,
-    #     hidden_channels_width=[1024, 1024, 1024, 1024],
-    #     output_features=1,
-    #     activation="leakyrelu",
-    #     dropout=("spatialdropout", {"p": 0.2}),
-    #     normalization=("batch", {"num_features": 1}),
-    #     ordering="NAD"
-    # )
-
-    # No use in sending to model to device yet, as it is not built !
-
     # Define loss function
     def mse(y_true: torch.Tensor, y_pred: torch.Tensor) -> torch.Tensor:
         """
@@ -89,9 +66,6 @@ if __name__ == "__main__":
         return ((y_true - y_pred) ** 2).mean()
 
     mse_loss = mse
-
-    # Initially, no training algorithm are defined
-    print("Initially, no training algorithm are defined :", model.learning_algorithms)
 
     # Define a learning procedure for the model and register it to the Model class under the name given in the decorator
     @model.register_learning_algorithm("basic_mse_adam_training")
@@ -138,14 +112,8 @@ if __name__ == "__main__":
 
         print("Training complete.")
 
-    # Now a learning algorithm is defined and registered to the model, it can be called when the model is built
-    print("Now a learning algorithm is defined and registered to the model :", model.learning_algorithms)
-
-    # Build the model. This actually initializes the model and its weights. See note in the Model base class for more...
-    # NOTE !! Model has to be built before being sent to a device !
+    # Build model
     model.build()
-
-    # Now that the model is built, it can be sent to the device
     model.to(device)
 
     # Train the model
@@ -156,7 +124,7 @@ if __name__ == "__main__":
         training_device=device
     )
 
-    # Test the trained model
+    # Visualize the trained model
     test_domain = np.linspace(-1.2, 2.25, 1000)
     model.eval()
     with torch.no_grad():
@@ -170,12 +138,18 @@ if __name__ == "__main__":
     for data_point in training_data:
         ax.scatter(data_point.x, data_point.y, color="black", zorder=2, s=10, marker="o")
     ax.plot(test_domain, y_pred, color='#4F609C', zorder=3)  # Plot trained model
-    ax.set_title("Trained Model Predictions And Training Data")
+    ax.set_title("SINGLE MODEL")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
+    ax.set_xlim(-1.2, 2.25)
+    ax.set_ylim(-2.0, 2.0)
     plt.show()
 
     # Monte-Carlo Dropout inference on test domain
+    fig, ax = plt.subplots()
+    for data_point in training_data:
+        ax.scatter(data_point.x, data_point.y, color="black", zorder=2, s=10, marker="o")
+
     num_mcd_samples = 1000
     mcd_samples = []
     for _ in range(num_mcd_samples):
@@ -185,25 +159,29 @@ if __name__ == "__main__":
             y_pred = model(
                 numpy_input_to_torch_input(test_domain).to(device)
             )
-            mcd_samples.append(y_pred.squeeze().cpu().numpy())
+
+            y_pred = y_pred.squeeze().cpu().numpy()
+
+            mcd_samples.append(y_pred)
+
+            # Plot individual models of ensemble as a distribution
+            ax.plot(test_domain, y_pred, zorder=3, color="black", alpha=0.01)
 
     # Get statistics across Monte-Carlo Dropout samples
-    y_mean = np.mean(mcd_samples, axis=0)
-    y_std = np.std(mcd_samples, axis=0)
+    # y_mean = np.mean(mcd_samples, axis=0)
+    # y_std = np.std(mcd_samples, axis=0)
+    # ax.plot(test_domain, y_mean, color='#4F609C', zorder=3)     # Plot mean y curve across all mcd samples
+    # ax.fill_between(                                            # Fill +-2 y standard deviation across all mcd samples
+    #     test_domain,
+    #     y_mean - 2 * y_std,
+    #     y_mean + 2 * y_std,
+    #     color="#C0DEF0",
+    #     zorder=0
+    # )
 
-    # Show the results
-    fig, ax = plt.subplots()
-    for data_point in training_data:
-        ax.scatter(data_point.x, data_point.y, color="black", zorder=2, s=10, marker="o")
-    ax.plot(test_domain, y_mean, color='#4F609C', zorder=3)     # Plot mean y curve across all mcd samples
-    ax.fill_between(                                            # Fill +-2 y standard deviation across all mcd samples
-        test_domain,
-        y_mean - 2 * y_std,
-        y_mean + 2 * y_std,
-        color="#C0DEF0",
-        zorder=0
-    )
-    ax.set_title("Trained Model Predictions And Training Data")
+    ax.set_title("MCD")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
+    ax.set_xlim(-1.2, 2.25)
+    ax.set_ylim(-2.0, 2.0)
     plt.show()
