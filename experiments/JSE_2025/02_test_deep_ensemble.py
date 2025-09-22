@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 
-from src.data.datasets import SyntheticDataset
 from src.data.generation import AleatoricUncertainty, NormalUncertainty, SimpleWigglyRegression
-from src.models import enable_dropout, MLP
+from src.models import MLP
 from src.utils import set_determinism
 from src.utils import numpy_input_to_torch_input
 
@@ -77,20 +75,20 @@ if __name__ == "__main__":
             ensemble_predictions.append(y_pred)
 
             # Plot individual models of ensemble as a distribution
-            ax.plot(test_domain, y_pred, zorder=3, color="black", alpha=0.01)
+            # ax.plot(test_domain, y_pred, zorder=3, color="black", alpha=0.01)
 
 
     # Plot a confidence region
-    # y_mean = np.mean(ensemble_predictions, axis=0)
-    # y_std = np.std(ensemble_predictions, axis=0)
-    # ax.plot(test_domain, y_mean, color='#4F609C', zorder=3)     # Plot mean y curve across all mcd samples
-    # ax.fill_between(                                            # Fill +-2 y standard deviation across all mcd samples
-    #     test_domain,
-    #     y_mean - 2 * y_std,
-    #     y_mean + 2 * y_std,
-    #     color="#C0DEF0",
-    #     zorder=0
-    # )
+    y_mean = np.mean(ensemble_predictions, axis=0)
+    y_std = np.std(ensemble_predictions, axis=0)
+    ax.plot(test_domain, y_mean, color='#9D343C', zorder=3)     # Plot mean y curve across all mcd samples
+    ax.fill_between(                                            # Fill +-2 y standard deviation across all mcd samples
+        test_domain,
+        y_mean - 2 * y_std,
+        y_mean + 2 * y_std,
+        color="#FFA99C",
+        zorder=0
+    )
 
     ax.set_title("DEEP ENSEMBLE")
     ax.set_xlabel("x")

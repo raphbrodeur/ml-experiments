@@ -165,19 +165,19 @@ if __name__ == "__main__":
             mcd_samples.append(y_pred)
 
             # Plot individual models of ensemble as a distribution
-            ax.plot(test_domain, y_pred, zorder=3, color="black", alpha=0.01)
+            # ax.plot(test_domain, y_pred, zorder=3, color="black", alpha=0.01)
 
     # Get statistics across Monte-Carlo Dropout samples
-    # y_mean = np.mean(mcd_samples, axis=0)
-    # y_std = np.std(mcd_samples, axis=0)
-    # ax.plot(test_domain, y_mean, color='#4F609C', zorder=3)     # Plot mean y curve across all mcd samples
-    # ax.fill_between(                                            # Fill +-2 y standard deviation across all mcd samples
-    #     test_domain,
-    #     y_mean - 2 * y_std,
-    #     y_mean + 2 * y_std,
-    #     color="#C0DEF0",
-    #     zorder=0
-    # )
+    y_mean = np.mean(mcd_samples, axis=0)
+    y_std = np.std(mcd_samples, axis=0)
+    ax.plot(test_domain, y_mean, color='#226258', zorder=3)     # Plot mean y curve across all mcd samples
+    ax.fill_between(                                            # Fill +-2 y standard deviation across all mcd samples
+        test_domain,
+        y_mean - 2 * y_std,
+        y_mean + 2 * y_std,
+        color="#B2DAAC",
+        zorder=0
+    )
 
     ax.set_title("MCD")
     ax.set_xlabel("x")

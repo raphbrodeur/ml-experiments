@@ -11,7 +11,7 @@ from src.data.generation import (
     NormalUncertainty,
     SimpleWigglyRegression
 )
-from src.models import enable_dropout, MLP
+from src.models import MLP
 from src.utils import numpy_input_to_torch_input, set_determinism
 
 
@@ -80,8 +80,8 @@ if __name__ == "__main__":
     ######################
     # TRAINING HYPERPARAMETERS
     dataset = training_ds
-    learning_rate = 1e-3    # TODO 5e-5
-    num_epochs = 3500  # TODO 500 4500 est bon pour 1e-3
+    learning_rate = 1e-3    # 1e-3
+    num_epochs = 3500  # 3500
     training_device = device
 
     train_loader = DataLoader(
@@ -120,6 +120,7 @@ if __name__ == "__main__":
     print("Training complete.")
     #################
 
+
     # Visualize the trained model
     test_domain = np.linspace(-1.2, 2.25, 1000)
     model.eval()
@@ -141,7 +142,8 @@ if __name__ == "__main__":
     ax.set_ylim(-2.0, 2.0)
     plt.show()
 
-    # BNN inference
+
+    # Visualize BNN inference and UQ
     fig, ax = plt.subplots()
     for data_point in training_data:
         ax.scatter(data_point.x, data_point.y, color="black", zorder=2, s=10, marker="o")
@@ -162,7 +164,7 @@ if __name__ == "__main__":
             # Plot individual models of ensemble as a distribution
             # ax.plot(test_domain, y_pred, zorder=3, color="black", alpha=0.01)
 
-    # Get statistics across Monte-Carlo Dropout samples
+    # Get statistics across BNN samples
     y_mean = np.mean(bnn_samples, axis=0)
     y_std = np.std(bnn_samples, axis=0)
     ax.plot(test_domain, y_mean, color='#4F609C', zorder=3)     # Plot mean y curve across all mcd samples
